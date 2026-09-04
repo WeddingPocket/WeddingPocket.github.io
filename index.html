@@ -1,0 +1,343 @@
+<title>화:답</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ---- 토큰: 라이트(기본) ---- */
+  :root {
+    --bg: #fffaf5;
+    --surface: #ffffff;
+    --surface-2: #fdf2f4;
+    --ink: #1f1a24;
+    --ink-soft: rgba(31, 26, 36, 0.62);
+    --ink-faint: rgba(31, 26, 36, 0.4);
+    --accent: #d1546f;
+    --accent-strong: #b13c58;
+    --accent-tint: #eea0af;
+    --gold: #c99a4c;
+    --border: rgba(31, 26, 36, 0.09);
+    --border-soft: rgba(31, 26, 36, 0.06);
+  }
+  /* ---- 토큰: 시스템 다크(명시적 선택 없을 때) ---- */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171219;
+      --surface: rgba(255, 255, 255, 0.045);
+      --surface-2: rgba(209, 84, 111, 0.1);
+      --ink: #fffaf5;
+      --ink-soft: rgba(255, 250, 245, 0.68);
+      --ink-faint: rgba(255, 250, 245, 0.42);
+      --accent: #e2758c;
+      --accent-strong: #eea0af;
+      --accent-tint: #8f2f47;
+      --gold: #e0b872;
+      --border: rgba(255, 255, 255, 0.11);
+      --border-soft: rgba(255, 255, 255, 0.07);
+    }
+  }
+  /* ---- 토큰: 명시적 다크 선택 ---- */
+  :root[data-theme="dark"] {
+    --bg: #171219;
+    --surface: rgba(255, 255, 255, 0.045);
+    --surface-2: rgba(209, 84, 111, 0.1);
+    --ink: #fffaf5;
+    --ink-soft: rgba(255, 250, 245, 0.68);
+    --ink-faint: rgba(255, 250, 245, 0.42);
+    --accent: #e2758c;
+    --accent-strong: #eea0af;
+    --accent-tint: #8f2f47;
+    --gold: #e0b872;
+    --border: rgba(255, 255, 255, 0.11);
+    --border-soft: rgba(255, 255, 255, 0.07);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans KR", -apple-system, "Malgun Gothic", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; }
+
+  .wrap { max-width: 840px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- 히어로 ---------- */
+  .hero {
+    padding: 88px 0 72px;
+    text-align: center;
+    background:
+      radial-gradient(60% 50% at 50% 0%, var(--surface-2), transparent 70%);
+  }
+  .hero-icon-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 28px;
+  }
+  .hero-icon-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -34px;
+    background: radial-gradient(circle, var(--accent-tint) 0%, transparent 68%);
+    opacity: 0.5;
+    filter: blur(4px);
+    animation: pulse-glow 4.5s ease-in-out infinite;
+    z-index: -1;
+  }
+  .hero-icon {
+    width: 84px;
+    height: 84px;
+    border-radius: 22px;
+    box-shadow: 0 12px 28px -12px rgba(177, 60, 88, 0.35);
+    display: block;
+    opacity: 0;
+    animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+  }
+  .hero h1 {
+    font-family: "Nanum Myeongjo", serif;
+    font-weight: 800;
+    font-size: clamp(2.6rem, 6vw, 3.6rem);
+    letter-spacing: 0.02em;
+    margin: 0 0 16px;
+    text-wrap: balance;
+    color: var(--ink);
+    opacity: 0;
+    animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.18s forwards;
+  }
+  .hero p.tagline {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    margin: 0 auto;
+    max-width: 34ch;
+    line-height: 1.6;
+    text-wrap: balance;
+    opacity: 0;
+    animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  }
+  .hero .eng {
+    font-family: "Nanum Myeongjo", serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.32em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin: 22px 0 0;
+    opacity: 0;
+    animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+  }
+
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.65; transform: scale(1.08); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-icon, .hero h1, .hero p.tagline, .hero .eng, .reveal {
+      animation: none !important;
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .hero-icon-wrap::before { animation: none !important; }
+  }
+
+  /* ---------- 소개 문단 ---------- */
+  .intro {
+    padding: 8px 0 56px;
+  }
+  .intro p {
+    font-size: 1.02rem;
+    line-height: 1.85;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  /* ---------- 기능 카드 ---------- */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 0 0 96px;
+  }
+  @media (max-width: 640px) {
+    .features { grid-template-columns: 1fr; }
+  }
+  .feature {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px 24px;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+  }
+  .feature:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-tint);
+    box-shadow: 0 18px 34px -20px rgba(177, 60, 88, 0.4);
+  }
+  .feature .mark {
+    font-family: "Nanum Myeongjo", serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 14px;
+    display: block;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .feature:hover .mark {
+    transform: translateY(-3px) rotate(-4deg);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .feature, .feature .mark { transition: none !important; }
+    .feature:hover { transform: none !important; }
+    .feature:hover .mark { transform: none !important; }
+  }
+  .feature h3 {
+    font-size: 1.02rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+  .feature p {
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  /* ---------- 시작 CTA 대체: 로그인 안내 ---------- */
+  .login-note {
+    text-align: center;
+    padding-bottom: 100px;
+  }
+  .login-note .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+  .login-note .pill b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- 법적 고지 링크 ---------- */
+  .legal-links {
+    padding: 0 0 64px;
+    border-top: 1px solid var(--border);
+  }
+  .legal-links .wrap {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+    padding-top: 40px;
+  }
+  .legal-links a {
+    font-size: 0.86rem;
+    color: var(--ink-faint);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .legal-links a:hover,
+  .legal-links a:focus-visible {
+    color: var(--accent-strong);
+    border-color: var(--accent-tint);
+  }
+  .legal-links a:focus-visible { outline: none; }
+
+  footer {
+    text-align: center;
+    padding: 0 0 64px;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+  footer a { color: var(--ink-faint); }
+</style>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="hero-icon-wrap"><img class="hero-icon" alt="" src="data:image/webp;base64,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"></span>
+    <h1>화:답</h1>
+    <p class="tagline">청첩장 정리부터 축의금 기록, 식장 후기까지<br>한 곳에서</p>
+    <p class="eng">HWA : DAP</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="intro">
+    <p>결혼식 시즌이 되면 여기저기서 날아오는 청첩장, 누구한테 얼마를 냈는지 헷갈리는 축의금 기록,
+      어느 식장이 괜찮았는지 궁금한 후기까지 — 화:답이 한 곳에서 정리해드립니다.</p>
+  </div>
+
+  <div class="features">
+    <div class="feature reveal" style="transition-delay:0.05s">
+      <span class="mark">壹</span>
+      <h3>청첩장, 자동으로 정리돼요</h3>
+      <p>받은 청첩장 링크 하나만 붙여넣으면 신랑·신부 이름, 예식 일시, 장소, 계좌번호까지 자동으로 정리됩니다.</p>
+    </div>
+    <div class="feature reveal" style="transition-delay:0.15s">
+      <span class="mark">貳</span>
+      <h3>축의금도 깜빡하지 않게</h3>
+      <p>누구한테 얼마를 냈는지 기록하고, 관계별 평균 축의금까지 한눈에 확인할 수 있어요.</p>
+    </div>
+    <div class="feature reveal" style="transition-delay:0.25s">
+      <span class="mark">參</span>
+      <h3>식장 후기도 미리 보고 가요</h3>
+      <p>다녀온 사람들의 후기를 남기고 열람할 수 있어요. 식사, 주차, 분위기까지 미리 알아보세요.</p>
+    </div>
+  </div>
+
+  <div class="login-note reveal">
+    <span class="pill">시작하기 — <b>Google</b> 또는 <b>카카오</b> 계정으로 로그인</span>
+  </div>
+</div>
+
+<div class="legal-links">
+  <div class="wrap">
+    <a href="https://claude.ai/code/artifact/8585860b-1c88-4c68-a68c-0eac5194d413">개인정보처리방침</a>
+    <a href="https://claude.ai/code/artifact/7aeac3db-b49d-45f2-a595-d108616db290">이용약관</a>
+    <a href="https://claude.ai/code/artifact/dfb491cd-2acf-43b0-b463-babafef46b28">계정 및 데이터 삭제</a>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">© 2026 화:답 · Junyeop Lee · <a href="mailto:weddingpocket.jy@gmail.com">weddingpocket.jy@gmail.com</a></div>
+</footer>
+
+<script>
+  // 스크롤에 걸리면 살짝 떠오르며 나타나는 연출. prefers-reduced-motion이면
+  // CSS에서 이미 opacity:1로 고정해두므로 여기선 클래스만 붙이면 됩니다.
+  var revealTargets = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && revealTargets.length) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealTargets.forEach(function (el) { io.observe(el); });
+  } else {
+    revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
+  }
+</script>
