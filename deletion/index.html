@@ -1,0 +1,230 @@
+<title>계정 및 데이터 삭제 · 화:답</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fffaf5;
+    --surface: #ffffff;
+    --surface-2: #fdf2f4;
+    --ink: #1f1a24;
+    --ink-soft: rgba(31, 26, 36, 0.62);
+    --ink-faint: rgba(31, 26, 36, 0.4);
+    --accent: #d1546f;
+    --accent-strong: #b13c58;
+    --accent-tint: #eea0af;
+    --gold: #c99a4c;
+    --border: rgba(31, 26, 36, 0.09);
+    --border-soft: rgba(31, 26, 36, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171219;
+      --surface: rgba(255, 255, 255, 0.045);
+      --surface-2: rgba(209, 84, 111, 0.1);
+      --ink: #fffaf5;
+      --ink-soft: rgba(255, 250, 245, 0.68);
+      --ink-faint: rgba(255, 250, 245, 0.42);
+      --accent: #e2758c;
+      --accent-strong: #eea0af;
+      --accent-tint: #8f2f47;
+      --gold: #e0b872;
+      --border: rgba(255, 255, 255, 0.11);
+      --border-soft: rgba(255, 255, 255, 0.07);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171219;
+    --surface: rgba(255, 255, 255, 0.045);
+    --surface-2: rgba(209, 84, 111, 0.1);
+    --ink: #fffaf5;
+    --ink-soft: rgba(255, 250, 245, 0.68);
+    --ink-faint: rgba(255, 250, 245, 0.42);
+    --accent: #e2758c;
+    --accent-strong: #eea0af;
+    --accent-tint: #8f2f47;
+    --gold: #e0b872;
+    --border: rgba(255, 255, 255, 0.11);
+    --border-soft: rgba(255, 255, 255, 0.07);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans KR", -apple-system, "Malgun Gothic", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+  .page-head {
+    padding: 40px 0 8px;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .back-link:hover { color: var(--accent-strong); }
+  .back-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  .doc {
+    max-width: 640px;
+    margin: 32px auto 96px;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rise-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.08s forwards;
+  }
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .doc { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
+  .doc-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 8px;
+  }
+  .doc-title h1 {
+    font-family: "Nanum Myeongjo", serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  .doc-title .date {
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .doc-lede {
+    font-size: 0.92rem;
+    line-height: 1.85;
+    color: var(--ink-soft);
+    margin: 22px 0 8px;
+  }
+  .clause {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .clause:last-child { border-bottom: none; }
+  .clause h3 {
+    font-size: 0.94rem;
+    font-weight: 700;
+    margin: 0 0 9px;
+    color: var(--ink);
+  }
+  .clause p {
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: var(--ink-soft);
+    margin: 0 0 6px;
+  }
+  .clause p:last-child { margin-bottom: 0; }
+  .officer {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+  .officer div b {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+  }
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  .steps li {
+    counter-increment: step;
+    display: flex;
+    gap: 12px;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+  .steps li::before {
+    content: counter(step);
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--accent-strong);
+    font-size: 0.74rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-variant-numeric: tabular-nums;
+  }
+  footer {
+    text-align: center;
+    padding: 0 0 64px;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+  footer a { color: var(--ink-faint); }
+
+</style>
+
+<div class="wrap page-head">
+  <a class="back-link" href="/">← 화:답</a>
+</div>
+
+<div class="wrap">
+<div class="doc">
+      <div class="doc-title">
+        <h1>계정 및 데이터 삭제</h1>
+      </div>
+      <p class="doc-lede">화:답(HWA:DAP)을 운영하는 Junyeop Lee입니다. 회원은 아래 절차에 따라 언제든지
+        계정과 데이터의 삭제를 요청할 수 있습니다.</p>
+
+      <div class="clause">
+        <h3>삭제 요청 방법</h3>
+        <ol class="steps">
+          <li>화:답 앱 실행</li>
+          <li>하단 <b>MY</b> 탭 이동</li>
+          <li><b>회원탈퇴</b> 선택</li>
+          <li>안내에 따라 확인</li>
+        </ol>
+      </div>
+      <div class="clause">
+        <h3>삭제되는 데이터</h3>
+        <p>청첩장 정보(신랑·신부 이름, 예식 일시·장소), 계좌번호, 축의금 기록, 예식장 후기, 이메일 및
+          프로필 정보를 포함한 모든 개인정보가 지체 없이 삭제됩니다.</p>
+      </div>
+      <div class="clause">
+        <h3>보관 기간</h3>
+        <p>관계 법령에 따라 보존이 필요한 정보가 있는 경우, 해당 법령이 정한 기간 동안만 보관 후
+          파기됩니다.</p>
+      </div>
+    </div>
+
+  
+</div>
+
+<footer>
+  <div class="wrap">© 2026 화:답 · Junyeop Lee · <a href="mailto:weddingpocket.jy@gmail.com">weddingpocket.jy@gmail.com</a></div>
+</footer>
