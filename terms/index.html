@@ -1,0 +1,274 @@
+<title>이용약관 · 화:답</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fffaf5;
+    --surface: #ffffff;
+    --surface-2: #fdf2f4;
+    --ink: #1f1a24;
+    --ink-soft: rgba(31, 26, 36, 0.62);
+    --ink-faint: rgba(31, 26, 36, 0.4);
+    --accent: #d1546f;
+    --accent-strong: #b13c58;
+    --accent-tint: #eea0af;
+    --gold: #c99a4c;
+    --border: rgba(31, 26, 36, 0.09);
+    --border-soft: rgba(31, 26, 36, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171219;
+      --surface: rgba(255, 255, 255, 0.045);
+      --surface-2: rgba(209, 84, 111, 0.1);
+      --ink: #fffaf5;
+      --ink-soft: rgba(255, 250, 245, 0.68);
+      --ink-faint: rgba(255, 250, 245, 0.42);
+      --accent: #e2758c;
+      --accent-strong: #eea0af;
+      --accent-tint: #8f2f47;
+      --gold: #e0b872;
+      --border: rgba(255, 255, 255, 0.11);
+      --border-soft: rgba(255, 255, 255, 0.07);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171219;
+    --surface: rgba(255, 255, 255, 0.045);
+    --surface-2: rgba(209, 84, 111, 0.1);
+    --ink: #fffaf5;
+    --ink-soft: rgba(255, 250, 245, 0.68);
+    --ink-faint: rgba(255, 250, 245, 0.42);
+    --accent: #e2758c;
+    --accent-strong: #eea0af;
+    --accent-tint: #8f2f47;
+    --gold: #e0b872;
+    --border: rgba(255, 255, 255, 0.11);
+    --border-soft: rgba(255, 255, 255, 0.07);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans KR", -apple-system, "Malgun Gothic", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+  .page-head {
+    padding: 40px 0 8px;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .back-link:hover { color: var(--accent-strong); }
+  .back-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  .doc {
+    max-width: 640px;
+    margin: 32px auto 96px;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rise-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.08s forwards;
+  }
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .doc { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
+  .doc-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 8px;
+  }
+  .doc-title h1 {
+    font-family: "Nanum Myeongjo", serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  .doc-title .date {
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .doc-lede {
+    font-size: 0.92rem;
+    line-height: 1.85;
+    color: var(--ink-soft);
+    margin: 22px 0 8px;
+  }
+  .clause {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .clause:last-child { border-bottom: none; }
+  .clause h3 {
+    font-size: 0.94rem;
+    font-weight: 700;
+    margin: 0 0 9px;
+    color: var(--ink);
+  }
+  .clause p {
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: var(--ink-soft);
+    margin: 0 0 6px;
+  }
+  .clause p:last-child { margin-bottom: 0; }
+  .officer {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+  .officer div b {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+  }
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  .steps li {
+    counter-increment: step;
+    display: flex;
+    gap: 12px;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+  .steps li::before {
+    content: counter(step);
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--accent-strong);
+    font-size: 0.74rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-variant-numeric: tabular-nums;
+  }
+  footer {
+    text-align: center;
+    padding: 0 0 64px;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+  footer a { color: var(--ink-faint); }
+
+</style>
+
+<div class="wrap page-head">
+  <a class="back-link" href="/">← 화:답</a>
+</div>
+
+<div class="wrap">
+<div class="doc">
+      <div class="doc-title">
+        <h1>이용약관</h1>
+        <span class="date">시행일자 2026.09.03</span>
+      </div>
+
+      <div class="clause">
+        <h3>제1조 (목적)</h3>
+        <p>이 약관은 Junyeop Lee(이하 "운영자")이 제공하는 서비스 "화:답"(이하 "서비스")의 이용과 관련하여
+          운영자와 이용자의 권리, 의무 및 책임사항을 정함을 목적으로 합니다.</p>
+      </div>
+      <div class="clause">
+        <h3>제2조 (정의)</h3>
+        <p>"서비스"란 청첩장 정보를 정리하고, 축의금 지출을 기록하며, 예식장 후기를 공유할 수 있도록 운영자가
+          제공하는 일체의 서비스를 말합니다.</p>
+        <p>"회원"이란 이 약관에 동의하고 서비스에 가입한 자를 말합니다.</p>
+      </div>
+      <div class="clause">
+        <h3>제3조 (약관의 효력 및 변경)</h3>
+        <p>이 약관은 서비스 화면에 게시하거나 기타의 방법으로 회원에게 공지함으로써 효력이 발생합니다.</p>
+        <p>운영자는 관련 법령을 위배하지 않는 범위에서 이 약관을 변경할 수 있으며, 변경 시 적용일자와
+          변경사유를 명시하여 사전에 공지합니다.</p>
+      </div>
+      <div class="clause">
+        <h3>제4조 (이용계약의 성립)</h3>
+        <p>이용계약은 이용자가 구글 또는 카카오 계정을 통한 소셜 로그인으로 회원가입을 신청하고, 운영자가
+          이를 승낙함으로써 성립합니다.</p>
+        <p>만 14세 미만은 회원가입을 할 수 없습니다.</p>
+      </div>
+      <div class="clause">
+        <h3>제5조 (서비스의 내용)</h3>
+        <p>운영자는 다음과 같은 서비스를 제공합니다: 청첩장 링크를 통한 예식 정보 자동 정리, 축의금 지출
+          기록 및 관리, 예식장 후기 작성 및 열람, 기타 운영자가 정하는 서비스</p>
+      </div>
+      <div class="clause">
+        <h3>제6조 (자동 인식 정보의 정확성)</h3>
+        <p>청첩장 링크에서 자동으로 인식되는 정보(신랑신부명, 일시, 장소, 계좌번호 등)는 기술적 한계로
+          부정확할 수 있으며, 회원은 저장 전 반드시 내용을 확인해야 합니다. 운영자는 자동 인식된 정보의
+          정확성을 보증하지 않습니다.</p>
+      </div>
+      <div class="clause">
+        <h3>제7조 (회원의 의무)</h3>
+        <p>회원은 관계 법령, 이 약관의 규정, 서비스와 관련하여 공지한 사항을 준수해야 하며, 서비스를 본래
+          목적에 맞게 이용해야 합니다.</p>
+      </div>
+      <div class="clause">
+        <h3>제8조 (게시물의 관리)</h3>
+        <p>회원이 작성한 예식장 후기는 다른 회원에게 공개되며, 운영자는 마스킹된 작성자 표시(예: "김**")
+          외 회원의 개인정보가 노출되지 않도록 조치합니다.</p>
+        <p>회원은 허위 후기, 타인을 비방하는 내용 등을 게시해서는 안 됩니다.</p>
+      </div>
+      <div class="clause">
+        <h3>제9조 (계약 해지)</h3>
+        <p>회원은 언제든지 서비스 내 [MY &gt; 회원탈퇴] 기능을 통해 이용계약을 해지할 수 있습니다.</p>
+        <p>탈퇴 시 회원의 개인정보 및 서비스 이용 기록은 관계 법령에 특별한 규정이 없는 한 지체 없이
+          파기됩니다.</p>
+      </div>
+      <div class="clause">
+        <h3>제10조 (면책조항)</h3>
+        <p>운영자는 천재지변, 불가항력적 사유로 서비스를 제공할 수 없는 경우 책임이 면제됩니다.</p>
+        <p>운영자는 회원이 서비스를 통해 얻은 정보로 인해 발생한 손해에 대해 책임을 지지 않습니다. 단,
+          운영자의 고의 또는 중대한 과실로 인한 경우는 제외합니다.</p>
+        <p>운영자는 회원 상호간 또는 회원과 제3자 간에 서비스를 매개로 발생한 분쟁에 개입할 의무가 없으며,
+          이로 인한 손해를 배상할 책임도 없습니다.</p>
+      </div>
+      <div class="clause">
+        <h3>제11조 (준거법 및 관할)</h3>
+        <p>이 약관과 관련한 분쟁에는 대한민국 법을 적용하며, 분쟁이 발생할 경우 민사소송법상의 관할
+          법원에 제소합니다.</p>
+      </div>
+    </div>
+
+    
+</div>
+
+<footer>
+  <div class="wrap">© 2026 화:답 · Junyeop Lee · <a href="mailto:weddingpocket.jy@gmail.com">weddingpocket.jy@gmail.com</a></div>
+</footer>
