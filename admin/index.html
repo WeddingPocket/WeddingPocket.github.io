@@ -97,7 +97,7 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
-  button, input { font: inherit; color: inherit; }
+  button, input, textarea { font: inherit; color: inherit; }
   button { cursor: pointer; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -305,13 +305,42 @@
   .mail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .mail-more { display: flex; justify-content: center; gap: 8px; padding-top: 8px; }
 
-  .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; max-width: 640px; }
-  .user-card h3 { margin: 0 0 12px; font-size: 16px; overflow-wrap: anywhere; }
+  .user-card, .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; max-width: 640px; }
+  .user-card h3, .settings-card h3 { margin: 0 0 12px; font-size: 16px; overflow-wrap: anywhere; }
   .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 0; }
   .facts div { min-width: 0; }
   .facts dt { color: var(--ink-soft); font-size: 12px; }
   .facts dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
   .id-line { margin-top: 12px; color: var(--ink-faint); font-size: 12px; overflow-wrap: anywhere; }
+
+  .settings { display: grid; gap: 16px; max-width: 640px; }
+  .settings-card h3 { margin-bottom: 4px; }
+  .settings-card > * + * { margin-top: 12px; }
+  .settings-card .facts { margin-top: 8px; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .form-row { display: grid; gap: 4px; min-width: 0; align-content: start; }
+  .form-label { font-weight: 600; }
+  .hint { color: var(--ink-faint); font-size: 12.5px; }
+  .counter { color: var(--ink-faint); font-size: 12px; text-align: right; }
+  .form-row .field { width: 100%; }
+  textarea.field { min-height: 96px; resize: vertical; line-height: 1.5; }
+  .banner { border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; display: grid; gap: 2px; }
+  .banner-info { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .banner-warning { background: color-mix(in srgb, var(--status-warning) 16%, var(--surface)); border-color: color-mix(in srgb, var(--status-warning) 55%, transparent); }
+  .banner-title { font-weight: 700; overflow-wrap: anywhere; }
+  .banner-body { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink-soft); }
+  .banner-body:empty { display: none; }
+  .banner.is-off { opacity: 0.55; }
+  .callout { border: 1px solid var(--status-warning); background: color-mix(in srgb, var(--status-warning) 14%, var(--surface)); border-radius: 10px; padding: 10px 14px; display: grid; gap: 8px; }
+  .callout b { font-weight: 700; }
+  .save-bar { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; }
+  .save-ok { color: var(--good-ink); font-weight: 600; }
+  .save-time { color: var(--ink-faint); font-size: 12.5px; }
+  .field-errors { margin: 0; padding-left: 18px; color: var(--danger-ink); font-weight: 500; }
+  .tile-link { display: block; width: 100%; text-align: left; cursor: pointer; }
+  .tile-link:hover { background: var(--surface-2); }
+  .tile-warning { border-color: var(--status-warning); background: color-mix(in srgb, var(--status-warning) 14%, var(--surface)); }
+  .tile-warning:hover { background: color-mix(in srgb, var(--status-warning) 22%, var(--surface)); }
 
   @media (max-width: 720px) {
     .charts { grid-template-columns: minmax(0, 1fr); }
@@ -336,6 +365,7 @@
       <button class="tab" role="tab" data-tab="reviews" aria-selected="false" type="button">후기 관리</button>
       <button class="tab" role="tab" data-tab="users" aria-selected="false" type="button">사용자 조회</button>
       <button class="tab" role="tab" data-tab="inquiries" aria-selected="false" type="button">문의</button>
+      <button class="tab" role="tab" data-tab="settings" aria-selected="false" type="button">앱 설정</button>
     </div>
   </div>
 </header>
@@ -367,6 +397,7 @@
     <div class="panel" id="panel-reviews" data-panel="reviews" hidden></div>
     <div class="panel" id="panel-users" data-panel="users" hidden></div>
     <div class="panel" id="panel-inquiries" data-panel="inquiries" hidden></div>
+    <div class="panel" id="panel-settings" data-panel="settings" hidden></div>
   </section>
 </main>
 
@@ -380,6 +411,11 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphbGFvemJ4cXdpa3d2dmx0ZWtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MzY4MTYsImV4cCI6MjEwMTQxMjgxNn0.mlAtqCDrUyetvUFgQ3uKoGzaPvZAhZFx6ZFbKkbCHlI';
 
   const REVIEW_PAGE_SIZE = 20;
+  const REPORT_REASON_LABELS = { abuse: '욕설·비방', ad: '광고·홍보', false_info: '허위 정보', privacy: '개인정보 노출', other: '기타' };
+  const NOTICE_LEVELS = [['info', '안내'], ['warning', '주의']];
+  const NOTICE_TITLE_LIMIT = 60;
+  const NOTICE_BODY_LIMIT = 500;
+  const SERVER_NOT_READY_MESSAGE = '서버 설정이 아직 적용되지 않았어요';
   const GMAIL_ADMIN_ADDRESS = 'weddingpocket.jy@gmail.com';
   const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
   const GMAIL_API = 'https://gmail.googleapis.com/gmail/v1/users/me';
@@ -416,7 +452,8 @@
     activityDays: 30,
     activityRows: [],
     activityAsTable: false,
-    reviews: { search: '', includeHidden: true, offset: 0, rows: [], hasNext: false, confirmId: null, errors: {}, requestId: 0 },
+    reviews: { search: '', includeHidden: true, reportedOnly: false, offset: 0, rows: [], hasNext: false, confirmId: null, confirmAction: null, errors: {}, requestId: 0 },
+    appConfig: { row: null, form: null, confirmRaise: false, saving: false, savedAt: null, errors: [], requestId: 0 },
     userRequestId: 0
   };
 
@@ -483,8 +520,13 @@
     return rows.reduce((total, row) => total + Number(row[key] || 0), 0);
   }
 
+  function isMissingFunction(error) {
+    return error.code === 'PGRST202' || error.status === 404;
+  }
+
   function describeError(error) {
     if (!error) return '';
+    if (isMissingFunction(error)) return SERVER_NOT_READY_MESSAGE;
     if (error.code === '42501') return '권한이 없어요';
     if (error.code === 'P0002') return '대상을 찾을 수 없어요';
     if (error.message && /fetch|network/i.test(error.message)) return '네트워크 연결을 확인해 주세요';
@@ -549,7 +591,8 @@
     state.userId = null;
     state.loadedTabs.clear();
     state.activityRows = [];
-    state.reviews = { ...state.reviews, offset: 0, rows: [], hasNext: false, confirmId: null, errors: {} };
+    state.reviews = { ...state.reviews, reportedOnly: false, offset: 0, rows: [], hasNext: false, confirmId: null, confirmAction: null, errors: {} };
+    state.appConfig = { row: null, form: null, confirmRaise: false, saving: false, savedAt: null, errors: [], requestId: state.appConfig.requestId + 1 };
     forgetGmail();
     document.querySelectorAll('[data-panel]').forEach(clear);
   }
@@ -764,9 +807,28 @@
       el('span', { style: `color:var(--status-${level.name})`, 'aria-hidden': 'true', text: level.icon }), level.label);
   }
 
+  function reportTile(row) {
+    const count = Number(row.open_review_reports || 0);
+    return el('button', { class: count > 0 ? 'tile tile-link tile-warning' : 'tile tile-link', type: 'button', onclick: openReportedReviews },
+      el('div', { class: 'tile-label', text: '처리 대기 신고' }),
+      el('div', { class: 'tile-value', text: formatNumber(count) }),
+      count > 0 && el('div', { class: 'tile-flag' }, el('span', { style: 'color:var(--status-warning)', 'aria-hidden': 'true', text: '◆' }), '확인이 필요해요'),
+      el('div', { class: 'tile-sub', text: '눌러서 신고된 후기 보기' }));
+  }
+
+  function openReportedReviews() {
+    state.reviews.reportedOnly = true;
+    state.reviews.search = '';
+    state.reviews.offset = 0;
+    state.loadedTabs.add('reviews');
+    selectTab('reviews');
+    loadReviewsPanel();
+  }
+
   function overviewTiles(row) {
     const failureRate = Number(row.parse_failure_rate_30d || 0);
     return [
+      reportTile(row),
       tile('전체 가입자', formatNumber(row.total_users), `최근 7일 +${formatNumber(row.users_last_7d)} · 30일 +${formatNumber(row.users_last_30d)}`),
       tile('등록된 청첩장', formatNumber(row.total_invites), `최근 30일 +${formatNumber(row.invites_last_30d)}`),
       tile('축의금 기록', formatNumber(row.total_ledger_entries), `최근 30일 +${formatNumber(row.ledger_last_30d)}`),
@@ -778,7 +840,7 @@
 
   function renderDashboardShell() {
     clear($('panel-dashboard')).append(
-      el('div', { class: 'tiles', id: 'overview-tiles' }, skeletons(6, 'skeleton-tile')),
+      el('div', { class: 'tiles', id: 'overview-tiles' }, skeletons(7, 'skeleton-tile')),
       el('div', { id: 'activity-section' }));
   }
 
@@ -876,17 +938,60 @@
         el('span', { class: 'chip', text: `${label} ${RATING_LABELS[value] || value}` })));
   }
 
-  function reviewActions(review) {
+  function reportReasonLabels(review) {
+    return (review.report_reasons || []).map((reason) => REPORT_REASON_LABELS[reason] || reason);
+  }
+
+  function reportBadges(review) {
+    const openCount = Number(review.open_report_count || 0);
+    if (!openCount) return null;
+    return el('div', { class: 'chips' },
+      el('span', { class: 'badge badge-warning' }, el('span', { 'aria-hidden': 'true', text: '◆' }), `신고 ${formatNumber(openCount)}건`),
+      reportReasonLabels(review).map((label) => el('span', { class: 'chip', text: label })));
+  }
+
+  function hasOpenReports(review) {
+    return Number(review.open_report_count || 0) > 0;
+  }
+
+  function cancelButton() {
+    return el('button', { class: 'btn btn-small', type: 'button', onclick: () => askConfirm(null), text: '취소' });
+  }
+
+  function toggleActions(review) {
     const isHidden = Boolean(review.hidden_at);
     const verb = isHidden ? '복구' : '숨기기';
     if (state.reviews.confirmId !== review.id) {
       return el('div', { class: 'review-actions' },
-        el('button', { class: 'btn btn-small', type: 'button', onclick: () => askConfirm(review.id), text: verb }));
+        el('button', { class: 'btn btn-small', type: 'button', onclick: () => askConfirm(review.id, 'toggle'), text: verb }));
     }
     return el('div', { class: 'review-actions' },
       el('span', { class: 'confirm-text', text: isHidden ? '이 후기를 다시 공개할까요?' : '이 후기를 앱에서 숨길까요?' }),
       el('button', { class: isHidden ? 'btn btn-small btn-primary' : 'btn btn-small btn-danger', type: 'button', onclick: () => toggleReviewHidden(review.id), text: `${verb} 확인` }),
-      el('button', { class: 'btn btn-small', type: 'button', onclick: () => askConfirm(null), text: '취소' }));
+      cancelButton());
+  }
+
+  function reportActionIdle(review) {
+    return el('div', { class: 'review-actions' },
+      el('button', { class: 'btn btn-small btn-danger', type: 'button', onclick: () => askConfirm(review.id, 'hide'), text: '숨기고 신고 처리' }),
+      el('button', { class: 'btn btn-small', type: 'button', onclick: () => askConfirm(review.id, 'dismiss'), text: '문제없음' }));
+  }
+
+  function reportActionConfirm(review) {
+    const hide = state.reviews.confirmAction === 'hide';
+    return el('div', { class: 'review-actions' },
+      el('span', { class: 'confirm-text', text: hide ? '후기를 숨기고 신고를 처리할까요?' : '문제없음으로 신고를 닫을까요? 후기는 그대로 보여요.' }),
+      el('button', { class: hide ? 'btn btn-small btn-danger' : 'btn btn-small btn-primary', type: 'button', onclick: () => resolveReports(review.id, hide), text: hide ? '숨기고 처리 확인' : '문제없음 확인' }),
+      cancelButton());
+  }
+
+  function reportActions(review) {
+    if (state.reviews.confirmId !== review.id) return reportActionIdle(review);
+    return reportActionConfirm(review);
+  }
+
+  function reviewActions(review) {
+    return hasOpenReports(review) ? reportActions(review) : toggleActions(review);
   }
 
   function reviewCard(review) {
@@ -897,6 +1002,7 @@
         review.hidden_at && el('span', { class: 'badge badge-hidden', text: '숨김' }),
         el('span', { class: 'review-meta', text: `${review.reviewer_label} · ${formatDateTime(review.created_at)}` })),
       ratingChips(review),
+      reportBadges(review),
       el('p', { class: review.comment ? 'review-comment' : 'review-comment is-empty', text: review.comment || '(코멘트 없음)' }),
       reviewActions(review),
       error && el('div', { class: 'row-error', role: 'alert', text: error }));
@@ -910,17 +1016,54 @@
       el('button', { class: 'btn', type: 'button', disabled: !state.reviews.hasNext, onclick: () => goToReviewPage(1), text: '다음' }));
   }
 
+  function emptyReviewTitle() {
+    return state.reviews.reportedOnly ? '처리할 신고가 없어요' : '후기가 없어요';
+  }
+
   function renderReviewList() {
     const list = clear($('review-list'));
     if (!state.reviews.rows.length) {
-      list.append(emptyState('후기가 없어요', state.reviews.search ? '검색어를 바꿔 보세요.' : '조건에 맞는 후기가 없어요.'));
+      list.append(emptyState(emptyReviewTitle(), state.reviews.search ? '검색어를 바꿔 보세요.' : '조건에 맞는 후기가 없어요.'));
       return;
     }
     list.append(...state.reviews.rows.map(reviewCard), pager());
   }
 
-  function askConfirm(reviewId) {
+  function askConfirm(reviewId, action) {
     state.reviews.confirmId = reviewId;
+    state.reviews.confirmAction = reviewId ? action : null;
+    renderReviewList();
+  }
+
+  function snapshotReportState(review) {
+    return { hidden_at: review.hidden_at, open_report_count: review.open_report_count, report_reasons: review.report_reasons };
+  }
+
+  function restoreReportState(review, snapshot) {
+    Object.assign(review, snapshot);
+  }
+
+  function markReportsResolved(review, hide) {
+    review.open_report_count = 0;
+    review.report_reasons = [];
+    if (hide) review.hidden_at = new Date().toISOString();
+  }
+
+  async function resolveReports(reviewId, hide) {
+    const review = state.reviews.rows.find((row) => row.id === reviewId);
+    if (!review) return;
+    const snapshot = snapshotReportState(review);
+    askConfirm(null);
+    delete state.reviews.errors[reviewId];
+    markReportsResolved(review, hide);
+    renderReviewList();
+    const { data, error } = await db.rpc('admin_resolve_review_reports', { p_review_id: reviewId, p_hide: hide });
+    if (error) {
+      restoreReportState(review, snapshot);
+      state.reviews.errors[reviewId] = describeError(error);
+    } else {
+      setRowHidden(review, data);
+    }
     renderReviewList();
   }
 
@@ -933,7 +1076,7 @@
     if (!review) return;
     const previous = review.hidden_at;
     const shouldHide = !previous;
-    state.reviews.confirmId = null;
+    askConfirm(null);
     delete state.reviews.errors[reviewId];
     setRowHidden(review, shouldHide ? new Date().toISOString() : null);
     renderReviewList();
@@ -960,13 +1103,15 @@
   async function loadReviews() {
     const requestId = ++state.reviews.requestId;
     state.reviews.confirmId = null;
+    state.reviews.confirmAction = null;
     state.reviews.errors = {};
     clear($('review-list')).append(...skeletons(3, 'skeleton-row'));
     const { data, error } = await db.rpc('admin_list_reviews', {
       p_search: state.reviews.search || null,
       p_include_hidden: state.reviews.includeHidden,
       p_limit: REVIEW_PAGE_SIZE + 1,
-      p_offset: state.reviews.offset
+      p_offset: state.reviews.offset,
+      p_reported_only: state.reviews.reportedOnly
     });
     if (requestId !== state.reviews.requestId) return;
     if (error) {
@@ -996,7 +1141,13 @@
       type: 'checkbox', checked: state.reviews.includeHidden,
       onchange: (event) => { state.reviews.includeHidden = event.target.checked; restartReviews(); }
     });
-    return el('div', { class: 'toolbar' }, search, el('label', { class: 'check' }, includeHidden, '숨긴 후기 포함'));
+    const reportedOnly = el('input', {
+      type: 'checkbox', checked: state.reviews.reportedOnly,
+      onchange: (event) => { state.reviews.reportedOnly = event.target.checked; restartReviews(); }
+    });
+    return el('div', { class: 'toolbar' }, search,
+      el('label', { class: 'check' }, reportedOnly, '신고된 후기만'),
+      el('label', { class: 'check' }, includeHidden, '숨긴 후기 포함'));
   }
 
   function loadReviewsPanel() {
@@ -1523,12 +1674,282 @@
     renderConnectPrompt();
   }
 
+  function toVersionForm(row) {
+    return {
+      minVersion: String(row.min_version_code),
+      latestVersion: String(row.latest_version_code),
+      noticeActive: Boolean(row.notice_active),
+      noticeLevel: row.notice_level === 'warning' ? 'warning' : 'info',
+      noticeTitle: row.notice_title || '',
+      noticeBody: row.notice_body || ''
+    };
+  }
+
+  function parseVersion(text) {
+    return /^\d+$/.test(text.trim()) ? Number(text.trim()) : null;
+  }
+
+  function versionErrors(form) {
+    const min = parseVersion(form.minVersion);
+    const latest = parseVersion(form.latestVersion);
+    const errors = [];
+    if (min === null) errors.push('최소 지원 버전은 0 이상의 정수로 입력해 주세요');
+    if (latest === null) errors.push('최신 버전은 0 이상의 정수로 입력해 주세요');
+    if (min !== null && latest !== null && latest < min) errors.push('최신 버전은 최소 지원 버전보다 낮을 수 없어요');
+    return errors;
+  }
+
+  function noticeErrors(form) {
+    const errors = [];
+    if (form.noticeActive && !form.noticeTitle.trim()) errors.push('공지를 켜려면 제목을 입력해 주세요');
+    if (form.noticeTitle.length > NOTICE_TITLE_LIMIT) errors.push(`제목은 ${NOTICE_TITLE_LIMIT}자까지 쓸 수 있어요`);
+    if (form.noticeBody.length > NOTICE_BODY_LIMIT) errors.push(`내용은 ${NOTICE_BODY_LIMIT}자까지 쓸 수 있어요`);
+    return errors;
+  }
+
+  function settingsErrors(form) {
+    return [...versionErrors(form), ...noticeErrors(form)];
+  }
+
+  function isRaisingMinVersion(form) {
+    return Number(form.minVersion) > Number(state.appConfig.row.min_version_code);
+  }
+
+  function saveErrorMessages(error) {
+    if (isMissingFunction(error) || error.code !== '22023') return [describeError(error)];
+    const message = error.message || '';
+    if (/latest_version_code/.test(message)) return ['최신 버전은 최소 지원 버전보다 낮을 수 없어요'];
+    if (/level/.test(message)) return ['공지 종류가 올바르지 않아요'];
+    if (/title|body/.test(message)) return [`제목은 ${NOTICE_TITLE_LIMIT}자, 내용은 ${NOTICE_BODY_LIMIT}자까지 쓸 수 있어요`];
+    return ['입력한 값을 확인해 주세요'];
+  }
+
+  function updateAppConfigParams(form) {
+    return {
+      p_min_version_code: Number(form.minVersion),
+      p_latest_version_code: Number(form.latestVersion),
+      p_notice_active: form.noticeActive,
+      p_notice_title: form.noticeTitle.trim(),
+      p_notice_body: form.noticeBody.trim(),
+      p_notice_level: form.noticeLevel
+    };
+  }
+
+  function bannerNode(form) {
+    const title = form.noticeTitle.trim() || '공지 제목이 여기에 보여요';
+    const classes = ['banner', `banner-${form.noticeLevel}`, form.noticeActive ? '' : 'is-off'].filter(Boolean).join(' ');
+    return el('div', { class: classes, id: 'banner-preview' },
+      el('div', { class: 'banner-title', text: title }),
+      el('div', { class: 'banner-body', text: form.noticeBody.trim() }));
+  }
+
+  function refreshBannerPreview() {
+    $('banner-preview').replaceWith(bannerNode(state.appConfig.form));
+  }
+
+  function counterText(value, limit) {
+    return `${value.length} / ${limit}`;
+  }
+
+  function bindTextField(key, counterId, limit) {
+    return (event) => {
+      state.appConfig.form[key] = event.target.value;
+      if (counterId) $(counterId).textContent = counterText(event.target.value, limit);
+      if (counterId) refreshBannerPreview();
+    };
+  }
+
+  function versionInput(key, id) {
+    return el('input', {
+      class: 'field', id, type: 'text', inputmode: 'numeric', autocomplete: 'off', value: state.appConfig.form[key],
+      oninput: bindTextField(key)
+    });
+  }
+
+  function versionRow(label, id, key, hint) {
+    return el('div', { class: 'form-row' },
+      el('label', { class: 'form-label', for: id, text: label }),
+      versionInput(key, id),
+      el('div', { class: 'hint', text: hint }));
+  }
+
+  function currentVersionFacts() {
+    const row = state.appConfig.row;
+    return el('dl', { class: 'facts' },
+      el('div', {}, el('dt', { text: '현재 최소 지원 버전' }), el('dd', { text: formatNumber(row.min_version_code) })),
+      el('div', {}, el('dt', { text: '현재 최신 버전' }), el('dd', { text: formatNumber(row.latest_version_code) })));
+  }
+
+  function versionSection() {
+    return el('section', { class: 'settings-card' },
+      el('h3', { text: '버전' }),
+      currentVersionFacts(),
+      el('div', { class: 'form-grid' },
+        versionRow('최소 지원 버전 (versionCode)', 'min-version', 'minVersion', "최소 지원 버전보다 낮은 앱에는 앱을 켤 때마다 '업데이트가 필요해요' 팝업이 떠요 (닫을 수 있어요)"),
+        versionRow('최신 버전 (versionCode)', 'latest-version', 'latestVersion', "최신 버전보다 낮은 앱에는 '새 버전이 나왔어요' 알림이 버전마다 한 번 떠요")));
+  }
+
+  function noticeActiveToggle() {
+    return el('label', { class: 'check' },
+      el('input', { type: 'checkbox', checked: state.appConfig.form.noticeActive, onchange: (event) => changeNoticeActive(event.target.checked) }),
+      '공지 켜기');
+  }
+
+  function noticeLevelPicker() {
+    const buttons = NOTICE_LEVELS.map(([level, label]) =>
+      segmentedButton(label, state.appConfig.form.noticeLevel === level, () => changeNoticeLevel(level)));
+    return el('div', { class: 'form-row' }, el('span', { class: 'form-label', text: '종류' }), el('div', { class: 'seg', style: 'justify-self:start' }, buttons));
+  }
+
+  function noticeTitleField() {
+    const form = state.appConfig.form;
+    return el('div', { class: 'form-row' },
+      el('label', { class: 'form-label', for: 'notice-title', text: '제목' }),
+      el('input', {
+        class: 'field', id: 'notice-title', type: 'text', maxlength: NOTICE_TITLE_LIMIT, autocomplete: 'off', value: form.noticeTitle,
+        oninput: bindTextField('noticeTitle', 'notice-title-count', NOTICE_TITLE_LIMIT)
+      }),
+      el('div', { class: 'counter', id: 'notice-title-count', text: counterText(form.noticeTitle, NOTICE_TITLE_LIMIT) }));
+  }
+
+  function noticeBodyField() {
+    const form = state.appConfig.form;
+    const textarea = el('textarea', {
+      class: 'field', id: 'notice-body', maxlength: NOTICE_BODY_LIMIT, rows: 4,
+      oninput: bindTextField('noticeBody', 'notice-body-count', NOTICE_BODY_LIMIT)
+    });
+    textarea.value = form.noticeBody;
+    return el('div', { class: 'form-row' },
+      el('label', { class: 'form-label', for: 'notice-body', text: '내용' }),
+      textarea,
+      el('div', { class: 'counter', id: 'notice-body-count', text: counterText(form.noticeBody, NOTICE_BODY_LIMIT) }));
+  }
+
+  function noticePreview() {
+    const form = state.appConfig.form;
+    return el('div', { class: 'form-row' },
+      el('span', { class: 'form-label', text: '미리보기' }),
+      bannerNode(form),
+      el('div', { class: 'hint', text: form.noticeActive ? '앱에서 이렇게 보여요' : '공지가 꺼져 있어서 지금은 앱에 보이지 않아요' }));
+  }
+
+  function noticeSection() {
+    return el('section', { class: 'settings-card' },
+      el('h3', { text: '공지' }),
+      noticeActiveToggle(),
+      noticeLevelPicker(),
+      noticeTitleField(),
+      noticeBodyField(),
+      noticePreview(),
+      el('div', { class: 'hint', text: '공지를 켜거나 내용을 바꾸면 닫았던 사용자에게도 다시 보여요' }));
+  }
+
+  function raiseConfirmBlock() {
+    return el('div', { class: 'callout', role: 'alert' },
+      el('div', {}, '최소 버전을 올리면 그보다 낮은 앱 사용자에게 앱을 켤 때마다 업데이트 팝업이 떠요. 계속할까요?'),
+      el('div', { class: 'save-bar' },
+        el('button', { class: 'btn btn-danger', type: 'button', onclick: submitAppConfig, text: '올리고 저장' }),
+        el('button', { class: 'btn', type: 'button', onclick: cancelRaiseConfirm, text: '취소' })));
+  }
+
+  function saveStatus() {
+    const config = state.appConfig;
+    if (!config.savedAt) return null;
+    return [el('span', { class: 'save-ok', text: '저장했어요' }), el('span', { class: 'save-time', text: `업데이트 ${formatDateTime(config.savedAt)}` })];
+  }
+
+  function lastUpdatedNote() {
+    const config = state.appConfig;
+    if (config.savedAt || !config.row.updated_at) return null;
+    return el('span', { class: 'save-time', text: `마지막 저장 ${formatDateTime(config.row.updated_at)}` });
+  }
+
+  function errorList() {
+    const errors = state.appConfig.errors;
+    if (!errors.length) return null;
+    return el('ul', { class: 'field-errors', role: 'alert' }, errors.map((message) => el('li', { text: message })));
+  }
+
+  function saveBar() {
+    const config = state.appConfig;
+    if (config.confirmRaise) return raiseConfirmBlock();
+    return el('div', { class: 'save-bar' },
+      el('button', { class: 'btn btn-primary', type: 'button', disabled: config.saving, onclick: requestSave, text: config.saving ? '저장하는 중' : '저장' }),
+      saveStatus(),
+      lastUpdatedNote());
+  }
+
+  function renderAppSettings() {
+    clear($('panel-settings')).append(
+      el('div', { class: 'settings' }, versionSection(), noticeSection(), errorList(), saveBar()));
+  }
+
+  function changeNoticeActive(active) {
+    state.appConfig.form.noticeActive = active;
+    renderAppSettings();
+  }
+
+  function changeNoticeLevel(level) {
+    state.appConfig.form.noticeLevel = level;
+    renderAppSettings();
+  }
+
+  function cancelRaiseConfirm() {
+    state.appConfig.confirmRaise = false;
+    renderAppSettings();
+  }
+
+  function requestSave() {
+    const config = state.appConfig;
+    config.savedAt = null;
+    config.errors = settingsErrors(config.form);
+    config.confirmRaise = config.errors.length === 0 && isRaisingMinVersion(config.form);
+    if (config.errors.length === 0 && !config.confirmRaise) return submitAppConfig();
+    renderAppSettings();
+  }
+
+  function applySavedConfig(row) {
+    const config = state.appConfig;
+    config.row = row;
+    config.form = toVersionForm(row);
+    config.savedAt = row.updated_at || new Date().toISOString();
+    config.errors = [];
+  }
+
+  async function submitAppConfig() {
+    const config = state.appConfig;
+    config.confirmRaise = false;
+    config.saving = true;
+    renderAppSettings();
+    const { data, error } = await db.rpc('admin_update_app_config', updateAppConfigParams(config.form));
+    config.saving = false;
+    if (error || !data || !data[0]) config.errors = error ? saveErrorMessages(error) : ['문제가 생겼어요. 잠시 후 다시 시도해 주세요'];
+    else applySavedConfig(data[0]);
+    renderAppSettings();
+  }
+
+  function appSettingsFailure(error) {
+    const retry = el('button', { class: 'btn', type: 'button', onclick: loadAppSettingsPanel, text: '다시 불러오기' });
+    clear($('panel-settings')).append(notice(describeError(error) || '앱 설정을 불러오지 못했어요'), el('div', {}, retry));
+  }
+
+  async function loadAppSettingsPanel() {
+    const requestId = ++state.appConfig.requestId;
+    clear($('panel-settings')).append(...skeletons(2, 'skeleton-row'));
+    const { data, error } = await db.rpc('admin_get_app_config');
+    if (requestId !== state.appConfig.requestId) return;
+    if (error || !data || !data[0]) return appSettingsFailure(error);
+    Object.assign(state.appConfig, { row: data[0], form: toVersionForm(data[0]), confirmRaise: false, saving: false, savedAt: null, errors: [] });
+    renderAppSettings();
+  }
+
   const TAB_LOADERS = {
     dashboard: loadDashboard,
     parse: loadParseQuality,
     reviews: loadReviewsPanel,
     users: loadUsersPanel,
-    inquiries: loadInquiriesPanel
+    inquiries: loadInquiriesPanel,
+    settings: loadAppSettingsPanel
   };
 
   function bindStaticControls() {
