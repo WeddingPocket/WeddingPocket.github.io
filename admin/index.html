@@ -1,0 +1,1037 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<title>화:답 관리자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f9f9f7;
+    --surface: #fcfcfb;
+    --surface-2: #f3f2ee;
+    --ink: #1f1a24;
+    --ink-soft: #52514e;
+    --ink-faint: #898781;
+    --accent: #d1546f;
+    --accent-strong: #b13c58;
+    --accent-ink: #ffffff;
+    --border: rgba(31, 26, 36, 0.12);
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --series-blue: #2a78d6;
+    --series-orange: #eb6834;
+    --series-aqua: #1baf7a;
+    --series-yellow: #eda100;
+    --status-good: #0ca30c;
+    --status-warning: #fab219;
+    --status-serious: #ec835a;
+    --status-critical: #d03b3b;
+    --good-ink: #006300;
+    --danger-ink: #b42323;
+    --danger-bg: #fdecec;
+    --shadow: 0 1px 2px rgba(31, 26, 36, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0d0d0d;
+      --surface: #1a1a19;
+      --surface-2: #242423;
+      --ink: #fffaf5;
+      --ink-soft: #c3c2b7;
+      --ink-faint: #898781;
+      --accent: #e2758c;
+      --accent-strong: #eea0af;
+      --accent-ink: #1a1013;
+      --border: rgba(255, 255, 255, 0.12);
+      --grid: #2c2c2a;
+      --axis: #383835;
+      --series-blue: #3987e5;
+      --series-orange: #d95926;
+      --series-aqua: #199e70;
+      --series-yellow: #c98500;
+      --good-ink: #0ca30c;
+      --danger-ink: #f19a9a;
+      --danger-bg: #3a1c1c;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-2: #242423;
+    --ink: #fffaf5;
+    --ink-soft: #c3c2b7;
+    --ink-faint: #898781;
+    --accent: #e2758c;
+    --accent-strong: #eea0af;
+    --accent-ink: #1a1013;
+    --border: rgba(255, 255, 255, 0.12);
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --series-blue: #3987e5;
+    --series-orange: #d95926;
+    --series-aqua: #199e70;
+    --series-yellow: #c98500;
+    --good-ink: #0ca30c;
+    --danger-ink: #f19a9a;
+    --danger-bg: #3a1c1c;
+    --shadow: none;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans KR", system-ui, -apple-system, "Malgun Gothic", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); }
+  .topbar-inner { display: flex; align-items: center; gap: 12px; min-height: 52px; flex-wrap: wrap; padding-block: 8px; }
+  .brand { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
+  .brand span { color: var(--accent); }
+  .brand small { font-weight: 500; color: var(--ink-faint); font-size: 12px; margin-left: 6px; }
+  .spacer { flex: 1; }
+  .who { color: var(--ink-soft); font-size: 13px; overflow-wrap: anywhere; }
+
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-weight: 500;
+    min-height: 34px;
+  }
+  .btn:hover { background: var(--surface-2); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  .btn-primary:hover { background: var(--accent-strong); }
+  .btn-danger { background: var(--status-critical); border-color: var(--status-critical); color: #fff; font-weight: 600; }
+  .btn-danger:hover { background: #b83030; }
+  .btn-small { padding: 3px 10px; min-height: 28px; font-size: 13px; }
+
+  .tabs { display: flex; gap: 4px; padding-top: 12px; overflow-x: auto; }
+  .tab {
+    border: 0;
+    background: transparent;
+    padding: 8px 14px;
+    border-bottom: 2px solid transparent;
+    color: var(--ink-soft);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 700; }
+
+  main { padding-block: 20px 56px; }
+  .panel > * + * { margin-top: 16px; }
+
+  .center-card {
+    max-width: 380px;
+    margin: 72px auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .center-card h1 { font-size: 18px; margin: 0 0 6px; }
+  .center-card p { margin: 0 0 18px; color: var(--ink-soft); }
+
+  .toolbar { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; }
+  .toolbar h2 { margin: 0; font-size: 15px; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; background: var(--surface); padding: 5px 12px; min-height: 32px; color: var(--ink-soft); }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); font-weight: 700; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow);
+    min-width: 0;
+  }
+  .tile-label { color: var(--ink-soft); font-size: 12.5px; }
+  .tile-value { font-size: 28px; font-weight: 700; line-height: 1.2; margin-top: 2px; }
+  .tile-sub { color: var(--ink-faint); font-size: 12px; margin-top: 2px; }
+  .tile-flag { display: inline-flex; gap: 5px; align-items: center; font-size: 12px; font-weight: 600; margin-top: 2px; color: var(--ink-soft); }
+
+  .charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .chart {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px 8px;
+    margin: 0;
+    box-shadow: var(--shadow);
+    min-width: 0;
+  }
+  .chart-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .chart-title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13.5px; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .chart-total { color: var(--ink-soft); font-size: 12.5px; }
+  .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .chart svg text { fill: var(--ink-faint); font-size: 10.5px; font-family: inherit; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .axis-line { stroke: var(--axis); stroke-width: 1; }
+  .cross-line { stroke: var(--ink-faint); stroke-width: 1; stroke-dasharray: 3 3; }
+  .hit { fill: transparent; cursor: crosshair; }
+
+  .tooltip {
+    position: fixed;
+    z-index: 10;
+    pointer-events: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    white-space: nowrap;
+  }
+  .tooltip b { font-size: 14px; }
+
+  .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px 12px; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--border); }
+  th { font-size: 12px; font-weight: 600; color: var(--ink-soft); background: var(--surface-2); position: sticky; top: 0; }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.dim { color: var(--ink-faint); }
+  .domain { font-weight: 600; }
+
+  .rate { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; }
+  .rate-bar { width: 56px; height: 6px; border-radius: 3px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
+  .rate-bar i { display: block; height: 100%; }
+  .rate-critical i { background: var(--status-critical); }
+  .rate-warning i { background: var(--status-warning); }
+  .rate-good i { background: var(--status-good); }
+  .rate-label { font-weight: 700; min-width: 44px; text-align: right; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); }
+  .badge-critical { border-color: var(--status-critical); }
+  .badge-warning { border-color: var(--status-warning); }
+  .badge-good { border-color: var(--status-good); }
+  .badge-hidden { border-color: var(--danger-ink); color: var(--danger-ink); }
+  .row-critical td { background: var(--danger-bg); }
+
+  .field {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 6px 10px;
+    min-height: 34px;
+    min-width: 0;
+  }
+  .field-grow { flex: 1 1 220px; }
+  .check { display: inline-flex; gap: 6px; align-items: center; color: var(--ink-soft); user-select: none; }
+
+  .list > * + * { margin-top: 8px; }
+  .review {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: grid;
+    gap: 6px;
+  }
+  .review.is-hidden { background: var(--surface-2); }
+  .review.is-hidden .review-comment { color: var(--ink-faint); }
+  .review-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .review-venue { font-weight: 700; }
+  .review-meta { color: var(--ink-faint); font-size: 12.5px; }
+  .review-comment { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .review-comment.is-empty { color: var(--ink-faint); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 0 8px; background: var(--surface); color: var(--ink-soft); }
+  .review-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .confirm-text { font-weight: 600; }
+  .row-error { color: var(--danger-ink); font-weight: 500; }
+  .pager { display: flex; gap: 8px; align-items: center; justify-content: center; padding-top: 8px; }
+  .pager span { color: var(--ink-soft); min-width: 64px; text-align: center; }
+
+  .notice { background: var(--danger-bg); color: var(--danger-ink); border-radius: 8px; padding: 10px 14px; font-weight: 500; }
+  .empty { text-align: center; color: var(--ink-soft); padding: 40px 16px; background: var(--surface); border: 1px dashed var(--border); border-radius: 10px; }
+  .empty b { display: block; color: var(--ink); margin-bottom: 2px; }
+
+  .skeleton { border-radius: 10px; background: linear-gradient(90deg, var(--surface-2), var(--surface), var(--surface-2)); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+  .skeleton-tile { height: 84px; }
+  .skeleton-chart { height: 200px; }
+  .skeleton-row { height: 72px; }
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+
+  .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; max-width: 640px; }
+  .user-card h3 { margin: 0 0 12px; font-size: 16px; overflow-wrap: anywhere; }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 0; }
+  .facts div { min-width: 0; }
+  .facts dt { color: var(--ink-soft); font-size: 12px; }
+  .facts dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .id-line { margin-top: 12px; color: var(--ink-faint); font-size: 12px; overflow-wrap: anywhere; }
+
+  @media (max-width: 720px) {
+    .charts { grid-template-columns: minmax(0, 1fr); }
+    .tile-value { font-size: 24px; }
+    main { padding-block: 14px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">화<span>:</span>답<small>관리자</small></div>
+    <div class="spacer"></div>
+    <span class="who" id="who" hidden></span>
+    <button class="btn" id="logout" type="button" hidden>로그아웃</button>
+  </div>
+  <div class="wrap" id="tabs-wrap" hidden>
+    <div class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-tab="dashboard" aria-selected="true" type="button">대시보드</button>
+      <button class="tab" role="tab" data-tab="parse" aria-selected="false" type="button">파싱 품질</button>
+      <button class="tab" role="tab" data-tab="reviews" aria-selected="false" type="button">후기 관리</button>
+      <button class="tab" role="tab" data-tab="users" aria-selected="false" type="button">사용자 조회</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="view-loading" data-view>
+    <div class="center-card"><p>불러오는 중이에요</p></div>
+  </section>
+
+  <section id="view-login" data-view hidden>
+    <div class="center-card">
+      <h1>관리자 로그인</h1>
+      <p>관리자 Google 계정으로 로그인해 주세요.</p>
+      <button class="btn btn-primary" id="login" type="button">Google로 로그인</button>
+      <p class="row-error" id="login-error" hidden style="margin-top:14px"></p>
+    </div>
+  </section>
+
+  <section id="view-denied" data-view hidden>
+    <div class="center-card">
+      <h1 id="denied-message">관리자 계정이 아니에요</h1>
+      <p id="denied-detail"></p>
+    </div>
+  </section>
+
+  <section id="view-app" data-view hidden>
+    <div class="panel" id="panel-dashboard" data-panel="dashboard"></div>
+    <div class="panel" id="panel-parse" data-panel="parse" hidden></div>
+    <div class="panel" id="panel-reviews" data-panel="reviews" hidden></div>
+    <div class="panel" id="panel-users" data-panel="users" hidden></div>
+  </section>
+</main>
+
+<div class="tooltip" id="tooltip" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://jalaozbxqwikwvvltekc.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphbGFvemJ4cXdpa3d2dmx0ZWtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MzY4MTYsImV4cCI6MjEwMTQxMjgxNn0.mlAtqCDrUyetvUFgQ3uKoGzaPvZAhZFx6ZFbKkbCHlI';
+
+  const REVIEW_PAGE_SIZE = 20;
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const RATING_LABELS = { good: '좋음', average: '보통', bad: '나쁨', unknown: '모름' };
+  const SOURCE_LABELS = { link: '링크', photo: '사진' };
+  const PROVIDER_LABELS = { google: 'Google', apple: 'Apple', kakao: '카카오', email: '이메일' };
+  const MISSING_COLUMNS = [
+    ['missing_groom_name', '신랑 이름'],
+    ['missing_bride_name', '신부 이름'],
+    ['missing_event_at', '예식 일시'],
+    ['missing_venue_name', '식장명'],
+    ['missing_venue_address', '식장 주소'],
+    ['missing_accounts', '계좌']
+  ];
+  const ACTIVITY_SERIES = [
+    { key: 'signups', label: '가입', color: 'var(--series-blue)' },
+    { key: 'invites', label: '청첩장 등록', color: 'var(--series-orange)' },
+    { key: 'ledger_entries', label: '축의금 기록', color: 'var(--series-aqua)' },
+    { key: 'reviews', label: '후기 작성', color: 'var(--series-yellow)' }
+  ];
+
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const state = {
+    userId: null,
+    activeTab: 'dashboard',
+    loadedTabs: new Set(),
+    activityDays: 30,
+    activityRows: [],
+    activityAsTable: false,
+    reviews: { search: '', includeHidden: true, offset: 0, rows: [], hasNext: false, confirmId: null, errors: {}, requestId: 0 },
+    userRequestId: 0
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  function el(tag, attrs, ...children) {
+    const node = document.createElement(tag);
+    applyAttributes(node, attrs || {});
+    appendChildren(node, children);
+    return node;
+  }
+
+  function svgEl(tag, attrs, ...children) {
+    const node = document.createElementNS(SVG_NS, tag);
+    Object.entries(attrs || {}).forEach(([name, value]) => node.setAttribute(name, value));
+    appendChildren(node, children);
+    return node;
+  }
+
+  function applyAttributes(node, attrs) {
+    Object.entries(attrs).forEach(([name, value]) => {
+      if (value === null || value === undefined || value === false) return;
+      if (name === 'text') node.textContent = value;
+      else if (name.startsWith('on')) node.addEventListener(name.slice(2), value);
+      else node.setAttribute(name, value === true ? '' : value);
+    });
+  }
+
+  function appendChildren(node, children) {
+    children.flat().forEach((child) => {
+      if (child === null || child === undefined || child === false) return;
+      node.append(child.nodeType ? child : document.createTextNode(String(child)));
+    });
+  }
+
+  function clear(node) {
+    node.replaceChildren();
+    return node;
+  }
+
+  function formatNumber(value) {
+    return Number(value ?? 0).toLocaleString('ko-KR');
+  }
+
+  function formatPercent(ratio) {
+    return `${(ratio * 100).toFixed(1)}%`;
+  }
+
+  function formatDateTime(value) {
+    if (!value) return '-';
+    return new Date(value).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  function formatShortDay(day) {
+    const [, month, date] = day.split('-');
+    return `${Number(month)}/${Number(date)}`;
+  }
+
+  function sumOf(rows, key) {
+    return rows.reduce((total, row) => total + Number(row[key] || 0), 0);
+  }
+
+  function describeError(error) {
+    if (!error) return '';
+    if (error.code === '42501') return '권한이 없어요';
+    if (error.code === 'P0002') return '대상을 찾을 수 없어요';
+    if (error.message && /fetch|network/i.test(error.message)) return '네트워크 연결을 확인해 주세요';
+    return '문제가 생겼어요. 잠시 후 다시 시도해 주세요';
+  }
+
+  function skeletons(count, className) {
+    return Array.from({ length: count }, () => el('div', { class: `skeleton ${className}` }));
+  }
+
+  function notice(message) {
+    return el('div', { class: 'notice', role: 'alert', text: message });
+  }
+
+  function emptyState(title, detail) {
+    return el('div', { class: 'empty' }, el('b', { text: title }), detail);
+  }
+
+  function showView(name) {
+    document.querySelectorAll('[data-view]').forEach((view) => { view.hidden = view.id !== `view-${name}`; });
+    $('tabs-wrap').hidden = name !== 'app';
+  }
+
+  function showSignedInChrome(email) {
+    $('who').textContent = email || '';
+    $('who').hidden = !email;
+    $('logout').hidden = false;
+  }
+
+  function hideSignedInChrome() {
+    $('who').hidden = true;
+    $('logout').hidden = true;
+  }
+
+  function showLogin(message) {
+    hideSignedInChrome();
+    $('login-error').hidden = !message;
+    $('login-error').textContent = message || '';
+    showView('login');
+  }
+
+  function showDenied(title, detail) {
+    $('denied-message').textContent = title;
+    $('denied-detail').textContent = detail || '';
+    showView('denied');
+  }
+
+  function signInWithGoogle() {
+    return db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${location.origin}/admin/` } });
+  }
+
+  async function startLogin() {
+    const { error } = await signInWithGoogle();
+    if (error) showLogin(describeError(error));
+  }
+
+  async function signOut() {
+    await db.auth.signOut();
+  }
+
+  function resetSession() {
+    state.userId = null;
+    state.loadedTabs.clear();
+    state.activityRows = [];
+    state.reviews = { ...state.reviews, offset: 0, rows: [], hasNext: false, confirmId: null, errors: {} };
+    document.querySelectorAll('[data-panel]').forEach(clear);
+  }
+
+  async function handleSession(session) {
+    if (!session) {
+      resetSession();
+      showLogin();
+      return;
+    }
+    if (state.userId === session.user.id) return;
+    state.userId = session.user.id;
+    showSignedInChrome(session.user.email);
+    showView('loading');
+    await admitIfAdmin(session);
+  }
+
+  async function admitIfAdmin(session) {
+    const { data, error } = await db.rpc('is_admin');
+    if (error) {
+      state.userId = null;
+      showDenied('확인하지 못했어요', describeError(error));
+      return;
+    }
+    if (data !== true) {
+      showDenied('관리자 계정이 아니에요', session.user.email || '');
+      return;
+    }
+    openApp();
+  }
+
+  function openApp() {
+    showView('app');
+    selectTab(state.activeTab);
+  }
+
+  function selectTab(name) {
+    state.activeTab = name;
+    document.querySelectorAll('.tab').forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.tab === name)));
+    document.querySelectorAll('[data-panel]').forEach((panel) => { panel.hidden = panel.dataset.panel !== name; });
+    loadTabOnce(name);
+  }
+
+  function loadTabOnce(name) {
+    if (state.loadedTabs.has(name)) return;
+    state.loadedTabs.add(name);
+    TAB_LOADERS[name]();
+  }
+
+  function showTooltip(event, lines) {
+    const tip = $('tooltip');
+    clear(tip).append(...lines);
+    tip.hidden = false;
+    const gap = 14;
+    const width = tip.offsetWidth;
+    const left = Math.min(event.clientX + gap, window.innerWidth - width - 8);
+    tip.style.left = `${Math.max(8, left)}px`;
+    tip.style.top = `${Math.max(8, event.clientY - tip.offsetHeight - gap)}px`;
+  }
+
+  function hideTooltip() {
+    $('tooltip').hidden = true;
+  }
+
+  function niceCeiling(value) {
+    if (value <= 4) return 4;
+    const magnitude = 10 ** Math.floor(Math.log10(value));
+    return [2, 4, 6, 8, 10].map((step) => step * magnitude).find((candidate) => candidate >= value);
+  }
+
+  function topRoundedBarPath(x, y, width, height, radius) {
+    const r = Math.min(radius, width / 2, height);
+    return `M${x},${y + height} V${y + r} Q${x},${y} ${x + r},${y} H${x + width - r} Q${x + width},${y} ${x + width},${y + r} V${y + height} Z`;
+  }
+
+  function chartGeometry(rowCount, maxValue) {
+    const box = { width: 520, height: 176, left: 34, right: 6, top: 8, bottom: 26 };
+    const plotWidth = box.width - box.left - box.right;
+    const plotHeight = box.height - box.top - box.bottom;
+    const step = plotWidth / rowCount;
+    return { box, plotWidth, plotHeight, step, ceiling: niceCeiling(maxValue), baseline: box.top + plotHeight };
+  }
+
+  function yAxisLayer(geometry) {
+    const { box, plotHeight, ceiling } = geometry;
+    return [0, ceiling / 2, ceiling].map((tick) => {
+      const y = box.top + plotHeight - (tick / ceiling) * plotHeight;
+      return svgEl('g', {},
+        svgEl('line', { class: tick === 0 ? 'axis-line' : 'grid-line', x1: box.left, x2: box.width - box.right, y1: y, y2: y }),
+        svgEl('text', { x: box.left - 6, y: y + 3.5, 'text-anchor': 'end' }, formatNumber(tick)));
+    });
+  }
+
+  function xAxisLayer(rows, geometry) {
+    const { box, step, baseline } = geometry;
+    const lastIndex = rows.length - 1;
+    const indexes = [...new Set([0, Math.round(lastIndex / 2), lastIndex])];
+    return indexes.map((index) => {
+      const anchor = index === 0 ? 'start' : index === lastIndex ? 'end' : 'middle';
+      const x = box.left + step * index + (anchor === 'start' ? 0 : anchor === 'end' ? step : step / 2);
+      return svgEl('text', { x, y: baseline + 16, 'text-anchor': anchor }, formatShortDay(rows[index].day));
+    });
+  }
+
+  function barLayer(rows, series, geometry) {
+    const { box, step, plotHeight, baseline, ceiling } = geometry;
+    const barWidth = Math.max(1.5, Math.min(10, step - 2));
+    return rows.filter((row) => row[series.key] > 0).map((row) => {
+      const index = rows.indexOf(row);
+      const height = Math.max(1.5, (row[series.key] / ceiling) * plotHeight);
+      const x = box.left + step * index + (step - barWidth) / 2;
+      return svgEl('path', { d: topRoundedBarPath(x, baseline - height, barWidth, height, 4), fill: series.color });
+    });
+  }
+
+  function hoverLayer(rows, series, geometry) {
+    const { box, step, plotHeight } = geometry;
+    const crosshair = svgEl('line', { class: 'cross-line', y1: box.top, y2: box.top + plotHeight, visibility: 'hidden' });
+    const hits = rows.map((row, index) => {
+      const x = box.left + step * index;
+      const hit = svgEl('rect', { class: 'hit', x, y: box.top, width: step, height: plotHeight });
+      hit.addEventListener('pointermove', (event) => {
+        crosshair.setAttribute('x1', x + step / 2);
+        crosshair.setAttribute('x2', x + step / 2);
+        crosshair.setAttribute('visibility', 'visible');
+        showTooltip(event, [el('div', { text: formatShortDay(row.day) }), el('b', { text: `${formatNumber(row[series.key])}건` })]);
+      });
+      hit.addEventListener('pointerleave', () => {
+        crosshair.setAttribute('visibility', 'hidden');
+        hideTooltip();
+      });
+      return hit;
+    });
+    return [crosshair, ...hits];
+  }
+
+  function barChartSvg(rows, series) {
+    const maxValue = Math.max(0, ...rows.map((row) => row[series.key]));
+    const geometry = chartGeometry(rows.length, maxValue);
+    const { box } = geometry;
+    return svgEl('svg', { viewBox: `0 0 ${box.width} ${box.height}`, role: 'img', 'aria-label': `${series.label} 일별 추이` },
+      yAxisLayer(geometry), barLayer(rows, series, geometry), xAxisLayer(rows, geometry), hoverLayer(rows, series, geometry));
+  }
+
+  function chartFigure(rows, series) {
+    const total = sumOf(rows, series.key);
+    return el('figure', { class: 'chart' },
+      el('div', { class: 'chart-head' },
+        el('div', { class: 'chart-title' }, el('span', { class: 'swatch', style: `background:${series.color}` }), series.label),
+        el('div', { class: 'chart-total', text: `기간 합계 ${formatNumber(total)}건` })),
+      barChartSvg(rows, series));
+  }
+
+  function activityTable(rows) {
+    const head = el('tr', {}, el('th', { text: '날짜' }), ACTIVITY_SERIES.map((series) => el('th', { class: 'num', text: series.label })));
+    const body = [...rows].reverse().map((row) =>
+      el('tr', {}, el('td', { text: row.day }), ACTIVITY_SERIES.map((series) => el('td', { class: 'num', text: formatNumber(row[series.key]) }))));
+    return el('div', { class: 'table-wrap' }, el('table', {}, el('thead', {}, head), el('tbody', {}, body)));
+  }
+
+  function activityBody(rows) {
+    if (state.activityAsTable) return activityTable(rows);
+    return el('div', { class: 'charts' }, ACTIVITY_SERIES.map((series) => chartFigure(rows, series)));
+  }
+
+  function segmentedButton(label, pressed, onClick) {
+    return el('button', { type: 'button', 'aria-pressed': String(pressed), onclick: onClick, text: label });
+  }
+
+  function activityToolbar() {
+    const rangeButtons = [30, 90].map((days) => segmentedButton(`${days}일`, state.activityDays === days, () => changeActivityDays(days)));
+    const viewButtons = [['차트', false], ['표', true]].map(([label, asTable]) =>
+      segmentedButton(label, state.activityAsTable === asTable, () => changeActivityView(asTable)));
+    return el('div', { class: 'toolbar' },
+      el('h2', { text: '일별 활동' }),
+      el('div', { class: 'spacer' }),
+      el('div', { class: 'seg' }, viewButtons),
+      el('div', { class: 'seg' }, rangeButtons));
+  }
+
+  function changeActivityView(asTable) {
+    state.activityAsTable = asTable;
+    renderActivitySection();
+  }
+
+  function changeActivityDays(days) {
+    state.activityDays = days;
+    loadActivity();
+  }
+
+  function renderActivitySection(bodyOverride) {
+    const section = $('activity-section');
+    clear(section).append(activityToolbar(), bodyOverride || activityBody(state.activityRows));
+  }
+
+  function tile(label, value, sub, flag) {
+    return el('div', { class: 'tile' },
+      el('div', { class: 'tile-label', text: label }),
+      el('div', { class: 'tile-value', text: value }),
+      flag,
+      sub && el('div', { class: 'tile-sub', text: sub }));
+  }
+
+  function failureLevel(rate) {
+    if (rate >= 0.3) return { name: 'critical', label: '위험', icon: '▲' };
+    if (rate >= 0.1) return { name: 'warning', label: '주의', icon: '◆' };
+    return { name: 'good', label: '양호', icon: '●' };
+  }
+
+  function levelFlag(level) {
+    return el('div', { class: 'tile-flag' },
+      el('span', { style: `color:var(--status-${level.name})`, 'aria-hidden': 'true', text: level.icon }), level.label);
+  }
+
+  function overviewTiles(row) {
+    const failureRate = Number(row.parse_failure_rate_30d || 0);
+    return [
+      tile('전체 가입자', formatNumber(row.total_users), `최근 7일 +${formatNumber(row.users_last_7d)} · 30일 +${formatNumber(row.users_last_30d)}`),
+      tile('등록된 청첩장', formatNumber(row.total_invites), `최근 30일 +${formatNumber(row.invites_last_30d)}`),
+      tile('축의금 기록', formatNumber(row.total_ledger_entries), `최근 30일 +${formatNumber(row.ledger_last_30d)}`),
+      tile('식장 후기', formatNumber(row.total_reviews), `숨김 ${formatNumber(row.hidden_reviews)}건`),
+      tile('링크 파싱 (30일)', formatNumber(row.parse_logs_last_30d), '고유 링크 기준'),
+      tile('링크 파싱 실패율 (30일)', formatPercent(failureRate), null, levelFlag(failureLevel(failureRate)))
+    ];
+  }
+
+  function renderDashboardShell() {
+    clear($('panel-dashboard')).append(
+      el('div', { class: 'tiles', id: 'overview-tiles' }, skeletons(6, 'skeleton-tile')),
+      el('div', { id: 'activity-section' }));
+  }
+
+  async function loadOverview() {
+    const { data, error } = await db.rpc('admin_overview');
+    const container = clear($('overview-tiles'));
+    if (error || !data || !data[0]) {
+      container.replaceWith(notice(describeError(error) || '요약을 불러오지 못했어요'));
+      return;
+    }
+    container.append(...overviewTiles(data[0]));
+  }
+
+  async function loadActivity() {
+    const days = state.activityDays;
+    renderActivitySection(el('div', { class: 'charts' }, skeletons(4, 'skeleton-chart')));
+    const { data, error } = await db.rpc('admin_daily_activity', { p_days: days });
+    if (days !== state.activityDays) return;
+    if (error || !data) {
+      renderActivitySection(notice(describeError(error) || '활동 내역을 불러오지 못했어요'));
+      return;
+    }
+    state.activityRows = data;
+    renderActivitySection();
+  }
+
+  function loadDashboard() {
+    renderDashboardShell();
+    loadOverview();
+    loadActivity();
+  }
+
+  function successRate(row) {
+    return row.total ? Number(row.parsed_count) / Number(row.total) : 0;
+  }
+
+  function failureRate(row) {
+    return row.total ? Number(row.failure_count) / Number(row.total) : 0;
+  }
+
+  function failureCell(row) {
+    const rate = failureRate(row);
+    const level = failureLevel(rate);
+    return el('td', { class: 'num' },
+      el('span', { class: `rate rate-${level.name}` },
+        el('span', { class: 'rate-bar', 'aria-hidden': 'true' }, el('i', { style: `width:${Math.round(rate * 100)}%` })),
+        el('span', { class: 'rate-label', text: formatPercent(rate) }),
+        el('span', { class: `badge badge-${level.name}` }, el('span', { 'aria-hidden': 'true', text: level.icon }), level.label)));
+  }
+
+  function countCell(value) {
+    const count = Number(value || 0);
+    return el('td', { class: count === 0 ? 'num dim' : 'num', text: count === 0 ? '–' : formatNumber(count) });
+  }
+
+  function parseRow(row) {
+    const level = failureLevel(failureRate(row));
+    return el('tr', { class: level.name === 'critical' ? 'row-critical' : '' },
+      el('td', { class: 'domain', text: row.domain || '(도메인 없음)' }),
+      el('td', { text: SOURCE_LABELS[row.source] || row.source }),
+      countCell(row.total),
+      countCell(row.total_attempts),
+      el('td', { class: 'num', text: formatPercent(successRate(row)) }),
+      failureCell(row),
+      countCell(row.low_confidence_count),
+      MISSING_COLUMNS.map(([key]) => countCell(row[key])));
+  }
+
+  function parseTable(rows) {
+    const head = el('tr', {},
+      el('th', { text: '도메인' }),
+      el('th', { text: '출처' }),
+      el('th', { class: 'num', text: '건수' }),
+      el('th', { class: 'num', text: '시도' }),
+      el('th', { class: 'num', text: '성공률' }),
+      el('th', { class: 'num', text: '실패율' }),
+      el('th', { class: 'num', text: '낮은 신뢰' }),
+      MISSING_COLUMNS.map(([, label]) => el('th', { class: 'num', text: `${label} 누락` })));
+    return el('div', { class: 'table-wrap' }, el('table', {}, el('thead', {}, head), el('tbody', {}, rows.map(parseRow))));
+  }
+
+  async function loadParseQuality() {
+    const panel = clear($('panel-parse'));
+    panel.append(el('div', { class: 'toolbar' }, el('h2', { text: '파싱 품질 (최근 30일)' })), ...skeletons(4, 'skeleton-row'));
+    const { data, error } = await db.rpc('admin_parse_quality');
+    clear(panel).append(el('div', { class: 'toolbar' }, el('h2', { text: '파싱 품질 (최근 30일)' })));
+    if (error) return panel.append(notice(describeError(error)));
+    if (!data.length) return panel.append(emptyState('아직 파싱 기록이 없어요', '최근 30일 동안 기록된 청첩장 파싱이 없어요.'));
+    panel.append(parseTable(data));
+  }
+
+  function ratingChips(review) {
+    return el('div', { class: 'chips' },
+      [['음식', review.food_rating], ['주차', review.parking_rating], ['분위기', review.mood_rating]].map(([label, value]) =>
+        el('span', { class: 'chip', text: `${label} ${RATING_LABELS[value] || value}` })));
+  }
+
+  function reviewActions(review) {
+    const isHidden = Boolean(review.hidden_at);
+    const verb = isHidden ? '복구' : '숨기기';
+    if (state.reviews.confirmId !== review.id) {
+      return el('div', { class: 'review-actions' },
+        el('button', { class: 'btn btn-small', type: 'button', onclick: () => askConfirm(review.id), text: verb }));
+    }
+    return el('div', { class: 'review-actions' },
+      el('span', { class: 'confirm-text', text: isHidden ? '이 후기를 다시 공개할까요?' : '이 후기를 앱에서 숨길까요?' }),
+      el('button', { class: isHidden ? 'btn btn-small btn-primary' : 'btn btn-small btn-danger', type: 'button', onclick: () => toggleReviewHidden(review.id), text: `${verb} 확인` }),
+      el('button', { class: 'btn btn-small', type: 'button', onclick: () => askConfirm(null), text: '취소' }));
+  }
+
+  function reviewCard(review) {
+    const error = state.reviews.errors[review.id];
+    return el('article', { class: review.hidden_at ? 'review is-hidden' : 'review' },
+      el('div', { class: 'review-head' },
+        el('span', { class: 'review-venue', text: review.venue_name }),
+        review.hidden_at && el('span', { class: 'badge badge-hidden', text: '숨김' }),
+        el('span', { class: 'review-meta', text: `${review.reviewer_label} · ${formatDateTime(review.created_at)}` })),
+      ratingChips(review),
+      el('p', { class: review.comment ? 'review-comment' : 'review-comment is-empty', text: review.comment || '(코멘트 없음)' }),
+      reviewActions(review),
+      error && el('div', { class: 'row-error', role: 'alert', text: error }));
+  }
+
+  function pager() {
+    const page = Math.floor(state.reviews.offset / REVIEW_PAGE_SIZE) + 1;
+    return el('div', { class: 'pager' },
+      el('button', { class: 'btn', type: 'button', disabled: state.reviews.offset === 0, onclick: () => goToReviewPage(-1), text: '이전' }),
+      el('span', { text: `${page} 페이지` }),
+      el('button', { class: 'btn', type: 'button', disabled: !state.reviews.hasNext, onclick: () => goToReviewPage(1), text: '다음' }));
+  }
+
+  function renderReviewList() {
+    const list = clear($('review-list'));
+    if (!state.reviews.rows.length) {
+      list.append(emptyState('후기가 없어요', state.reviews.search ? '검색어를 바꿔 보세요.' : '조건에 맞는 후기가 없어요.'));
+      return;
+    }
+    list.append(...state.reviews.rows.map(reviewCard), pager());
+  }
+
+  function askConfirm(reviewId) {
+    state.reviews.confirmId = reviewId;
+    renderReviewList();
+  }
+
+  function setRowHidden(review, hiddenAt) {
+    review.hidden_at = hiddenAt;
+  }
+
+  async function toggleReviewHidden(reviewId) {
+    const review = state.reviews.rows.find((row) => row.id === reviewId);
+    if (!review) return;
+    const previous = review.hidden_at;
+    const shouldHide = !previous;
+    state.reviews.confirmId = null;
+    delete state.reviews.errors[reviewId];
+    setRowHidden(review, shouldHide ? new Date().toISOString() : null);
+    renderReviewList();
+    const { data, error } = await db.rpc('admin_set_review_hidden', { p_review_id: reviewId, p_hidden: shouldHide });
+    if (error) {
+      setRowHidden(review, previous);
+      state.reviews.errors[reviewId] = describeError(error);
+    } else {
+      setRowHidden(review, data);
+    }
+    renderReviewList();
+  }
+
+  function goToReviewPage(direction) {
+    state.reviews.offset = Math.max(0, state.reviews.offset + direction * REVIEW_PAGE_SIZE);
+    loadReviews();
+  }
+
+  function restartReviews() {
+    state.reviews.offset = 0;
+    loadReviews();
+  }
+
+  async function loadReviews() {
+    const requestId = ++state.reviews.requestId;
+    state.reviews.confirmId = null;
+    state.reviews.errors = {};
+    clear($('review-list')).append(...skeletons(3, 'skeleton-row'));
+    const { data, error } = await db.rpc('admin_list_reviews', {
+      p_search: state.reviews.search || null,
+      p_include_hidden: state.reviews.includeHidden,
+      p_limit: REVIEW_PAGE_SIZE + 1,
+      p_offset: state.reviews.offset
+    });
+    if (requestId !== state.reviews.requestId) return;
+    if (error) {
+      clear($('review-list')).append(notice(describeError(error)));
+      return;
+    }
+    state.reviews.hasNext = data.length > REVIEW_PAGE_SIZE;
+    state.reviews.rows = data.slice(0, REVIEW_PAGE_SIZE);
+    renderReviewList();
+  }
+
+  function debounce(fn, delay) {
+    let timer = null;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  }
+
+  function reviewToolbar() {
+    const restartSoon = debounce(restartReviews, 300);
+    const search = el('input', {
+      class: 'field field-grow', type: 'search', placeholder: '식장명 또는 후기 내용 검색', 'aria-label': '후기 검색',
+      oninput: (event) => { state.reviews.search = event.target.value.trim(); restartSoon(); }
+    });
+    const includeHidden = el('input', {
+      type: 'checkbox', checked: state.reviews.includeHidden,
+      onchange: (event) => { state.reviews.includeHidden = event.target.checked; restartReviews(); }
+    });
+    return el('div', { class: 'toolbar' }, search, el('label', { class: 'check' }, includeHidden, '숨긴 후기 포함'));
+  }
+
+  function loadReviewsPanel() {
+    clear($('panel-reviews')).append(reviewToolbar(), el('div', { class: 'list', id: 'review-list' }));
+    loadReviews();
+  }
+
+  function userFacts(user) {
+    const providers = (user.providers || []).map((name) => PROVIDER_LABELS[name] || name).join(', ') || '-';
+    return [
+      ['가입일', formatDateTime(user.created_at)],
+      ['마지막 로그인', formatDateTime(user.last_sign_in_at)],
+      ['로그인 방식', providers],
+      ['약관 동의', user.consent_version ? `버전 ${user.consent_version}` : '동의 기록 없음'],
+      ['청첩장', `${formatNumber(user.invite_count)}건`],
+      ['축의금 기록', `${formatNumber(user.ledger_entry_count)}건`],
+      ['식장 후기', `${formatNumber(user.review_count)}건`]
+    ].map(([label, value]) => el('div', {}, el('dt', { text: label }), el('dd', { text: value })));
+  }
+
+  function userCard(user) {
+    return el('div', { class: 'user-card' },
+      el('h3', { text: user.email }),
+      el('dl', { class: 'facts' }, userFacts(user)),
+      el('div', { class: 'id-line', text: `사용자 ID ${user.user_id}` }));
+  }
+
+  async function findUser(email) {
+    const requestId = ++state.userRequestId;
+    const result = clear($('user-result'));
+    result.append(...skeletons(1, 'skeleton-row'));
+    const { data, error } = await db.rpc('admin_find_user', { p_email: email });
+    if (requestId !== state.userRequestId) return;
+    clear(result);
+    if (error) return result.append(notice(describeError(error)));
+    if (!data.length) return result.append(emptyState('사용자를 찾을 수 없어요', '이메일을 정확히 입력했는지 확인해 주세요.'));
+    result.append(userCard(data[0]));
+  }
+
+  function submitUserSearch(event) {
+    event.preventDefault();
+    const email = new FormData(event.target).get('email').trim();
+    if (email) findUser(email);
+  }
+
+  function loadUsersPanel() {
+    const form = el('form', { class: 'toolbar', onsubmit: submitUserSearch },
+      el('input', { class: 'field field-grow', name: 'email', type: 'email', required: true, placeholder: '이메일 주소 (정확히 일치)', 'aria-label': '이메일', autocomplete: 'off' }),
+      el('button', { class: 'btn btn-primary', type: 'submit', text: '조회' }));
+    clear($('panel-users')).append(form, el('div', { id: 'user-result' }, emptyState('이메일로 사용자를 찾아요', '청첩장·장부 내용은 보이지 않고 건수만 확인할 수 있어요.')));
+  }
+
+  const TAB_LOADERS = {
+    dashboard: loadDashboard,
+    parse: loadParseQuality,
+    reviews: loadReviewsPanel,
+    users: loadUsersPanel
+  };
+
+  function bindStaticControls() {
+    $('login').addEventListener('click', startLogin);
+    $('logout').addEventListener('click', signOut);
+    $('tabs').addEventListener('click', (event) => {
+      const tab = event.target.closest('.tab');
+      if (tab) selectTab(tab.dataset.tab);
+    });
+  }
+
+  function listenToAuth() {
+    db.auth.onAuthStateChange((event, session) => {
+      setTimeout(() => handleSession(session), 0);
+    });
+  }
+
+  bindStaticControls();
+  listenToAuth();
+</script>
+</body>
+</html>
