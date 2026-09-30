@@ -104,7 +104,7 @@
   .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
 
   .topbar { background: var(--surface); border-bottom: 1px solid var(--border); }
-  .topbar-inner { display: flex; align-items: center; gap: 12px; min-height: 52px; flex-wrap: wrap; padding-block: 8px; }
+  .topbar-inner { display: flex; align-items: center; gap: 12px; min-height: 52px; flex-wrap: wrap; padding-block: 16px; }
   .brand { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
   .brand span { color: var(--accent); }
   .brand small { font-weight: 500; color: var(--ink-faint); font-size: 12px; margin-left: 6px; }
@@ -127,12 +127,13 @@
   .btn-danger:hover { background: #b83030; }
   .btn-small { padding: 3px 10px; min-height: 28px; font-size: 13px; }
 
-  .tabs { display: flex; gap: 4px; padding-top: 12px; overflow-x: auto; }
+  .tabs { display: flex; gap: 6px; padding-block: 2px 12px; overflow-x: auto; }
   .tab {
     border: 0;
     background: transparent;
-    padding: 8px 14px;
-    border-bottom: 2px solid transparent;
+    padding: 10px 14px;
+    min-height: 40px;
+    border-bottom: 3px solid transparent;
     color: var(--ink-soft);
     font-weight: 500;
     white-space: nowrap;
@@ -140,7 +141,7 @@
   .tab:hover { color: var(--ink); }
   .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 700; }
 
-  main { padding-block: 20px 56px; }
+  main { padding-block: 32px 56px; }
   .panel > * + * { margin-top: 16px; }
 
   .center-card {
@@ -292,7 +293,7 @@
   @media (max-width: 720px) {
     .charts { grid-template-columns: minmax(0, 1fr); }
     .tile-value { font-size: 24px; }
-    main { padding-block: 14px 40px; }
+    main { padding-block: 24px 40px; }
   }
 </style>
 </head>
