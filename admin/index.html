@@ -118,6 +118,11 @@
     padding: 6px 12px;
     font-weight: 500;
     min-height: 34px;
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
   }
   .btn:hover { background: var(--surface-2); }
   .btn:disabled { opacity: 0.5; cursor: default; }
@@ -282,6 +287,24 @@
   @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
   @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
 
+  .empty-action { margin-top: 14px; }
+  .mail { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .mail-row { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 0 12px; width: 100%; text-align: left; border: 0; background: transparent; padding: 12px 14px; }
+  .mail-row:hover { background: var(--surface-2); }
+  .mail-dot { width: 8px; height: 8px; margin-top: 7px; border-radius: 50%; }
+  .mail-dot.is-unread { background: var(--accent); }
+  .mail-main { min-width: 0; display: grid; gap: 2px; }
+  .mail-from strong { font-weight: 700; }
+  .mail-from span { color: var(--ink-faint); font-size: 12.5px; margin-left: 6px; overflow-wrap: anywhere; }
+  .mail-subject { font-weight: 500; overflow-wrap: anywhere; }
+  .mail-snippet { color: var(--ink-soft); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mail-date { color: var(--ink-faint); font-size: 12.5px; white-space: nowrap; }
+  .mail-detail { border-top: 1px solid var(--border); padding: 14px; display: grid; gap: 12px; }
+  .mail-detail > * { min-width: 0; }
+  .mail-body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .mail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .mail-more { display: flex; justify-content: center; gap: 8px; padding-top: 8px; }
+
   .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; max-width: 640px; }
   .user-card h3 { margin: 0 0 12px; font-size: 16px; overflow-wrap: anywhere; }
   .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 0; }
@@ -312,6 +335,7 @@
       <button class="tab" role="tab" data-tab="parse" aria-selected="false" type="button">파싱 품질</button>
       <button class="tab" role="tab" data-tab="reviews" aria-selected="false" type="button">후기 관리</button>
       <button class="tab" role="tab" data-tab="users" aria-selected="false" type="button">사용자 조회</button>
+      <button class="tab" role="tab" data-tab="inquiries" aria-selected="false" type="button">문의</button>
     </div>
   </div>
 </header>
@@ -342,17 +366,28 @@
     <div class="panel" id="panel-parse" data-panel="parse" hidden></div>
     <div class="panel" id="panel-reviews" data-panel="reviews" hidden></div>
     <div class="panel" id="panel-users" data-panel="users" hidden></div>
+    <div class="panel" id="panel-inquiries" data-panel="inquiries" hidden></div>
   </section>
 </main>
 
 <div class="tooltip" id="tooltip" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
+  const GMAIL_OAUTH_CLIENT_ID = '';
   const SUPABASE_URL = 'https://jalaozbxqwikwvvltekc.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphbGFvemJ4cXdpa3d2dmx0ZWtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MzY4MTYsImV4cCI6MjEwMTQxMjgxNn0.mlAtqCDrUyetvUFgQ3uKoGzaPvZAhZFx6ZFbKkbCHlI';
 
   const REVIEW_PAGE_SIZE = 20;
+  const GMAIL_ADMIN_ADDRESS = 'weddingpocket.jy@gmail.com';
+  const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
+  const GMAIL_API = 'https://gmail.googleapis.com/gmail/v1/users/me';
+  const GMAIL_PAGE_SIZE = 20;
+  const GMAIL_FETCH_CONCURRENCY = 5;
+  const GMAIL_QUERIES = { inquiry: 'subject:"[화:답] 문의/건의"', inbox: 'in:inbox' };
+  const GMAIL_MODE_LABELS = [['inquiry', '문의 메일만'], ['inbox', '받은편지함 전체']];
+  const GMAIL_SUMMARY_HEADERS = ['From', 'Subject', 'Date'];
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const RATING_LABELS = { good: '좋음', average: '보통', bad: '나쁨', unknown: '모름' };
   const SOURCE_LABELS = { link: '링크', photo: '사진' };
@@ -384,6 +419,10 @@
     reviews: { search: '', includeHidden: true, offset: 0, rows: [], hasNext: false, confirmId: null, errors: {}, requestId: 0 },
     userRequestId: 0
   };
+
+  let gmailToken = null;
+  let gmailTokenClient = null;
+  const gmail = { mode: 'inquiry', rows: [], nextPageToken: null, openId: null, details: {}, loading: false, failure: null, requestId: 0 };
 
   const $ = (id) => document.getElementById(id);
 
@@ -511,6 +550,7 @@
     state.loadedTabs.clear();
     state.activityRows = [];
     state.reviews = { ...state.reviews, offset: 0, rows: [], hasNext: false, confirmId: null, errors: {} };
+    forgetGmail();
     document.querySelectorAll('[data-panel]').forEach(clear);
   }
 
@@ -1009,11 +1049,486 @@
     clear($('panel-users')).append(form, el('div', { id: 'user-result' }, emptyState('이메일로 사용자를 찾아요', '청첩장·장부 내용은 보이지 않고 건수만 확인할 수 있어요.')));
   }
 
+  class GmailError extends Error {
+    constructor(status, detail) {
+      super(`gmail ${status}`);
+      this.status = status;
+      this.detail = detail || '';
+    }
+  }
+
+  function isGoogleIdentityReady() {
+    return Boolean(window.google && google.accounts && google.accounts.oauth2);
+  }
+
+  function revokeGmailToken() {
+    const token = gmailToken;
+    gmailToken = null;
+    if (token && isGoogleIdentityReady()) google.accounts.oauth2.revoke(token, () => {});
+  }
+
+  function resetGmailView() {
+    gmail.requestId += 1;
+    gmail.rows = [];
+    gmail.nextPageToken = null;
+    gmail.openId = null;
+    gmail.details = {};
+    gmail.loading = false;
+    gmail.failure = null;
+  }
+
+  function forgetGmail() {
+    revokeGmailToken();
+    resetGmailView();
+  }
+
+  function disconnectGmail() {
+    forgetGmail();
+    renderConnectPrompt();
+  }
+
+  function base64ToBytes(encoded) {
+    const normalized = encoded.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, '');
+    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+    return Uint8Array.from(atob(padded), (character) => character.charCodeAt(0));
+  }
+
+  function quotedPrintableToBytes(encoded) {
+    const text = encoded.replace(/_/g, ' ');
+    const bytes = [];
+    for (let index = 0; index < text.length; index += 1) {
+      const isEscape = text[index] === '=' && /^[0-9a-fA-F]{2}$/.test(text.slice(index + 1, index + 3));
+      bytes.push(isEscape ? parseInt(text.slice(index + 1, index + 3), 16) : text.charCodeAt(index));
+      if (isEscape) index += 2;
+    }
+    return Uint8Array.from(bytes);
+  }
+
+  function decodeBytes(bytes, charset) {
+    try {
+      return new TextDecoder(charset || 'utf-8').decode(bytes);
+    } catch {
+      return new TextDecoder('utf-8').decode(bytes);
+    }
+  }
+
+  function decodeMimeWords(text) {
+    return text
+      .replace(/(\?=)\s+(=\?)/g, '$1$2')
+      .replace(/=\?([\w-]+)\?([BbQq])\?([^?]*)\?=/g, (whole, charset, method, payload) => {
+        const bytes = method.toUpperCase() === 'B' ? base64ToBytes(payload) : quotedPrintableToBytes(payload);
+        return decodeBytes(bytes, charset);
+      });
+  }
+
+  function decodeHtmlEntities(text) {
+    return new DOMParser().parseFromString(text, 'text/html').documentElement.textContent;
+  }
+
+  function headerValue(headers, name) {
+    const found = (headers || []).find((header) => header.name.toLowerCase() === name.toLowerCase());
+    return found ? decodeMimeWords(found.value) : '';
+  }
+
+  function parseSender(raw) {
+    const match = raw.match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>\s*$/);
+    if (!match) return { name: '', address: raw.trim() };
+    return { name: match[1].trim(), address: match[2].trim() };
+  }
+
+  function seoulParts(millis) {
+    const formatter = new Intl.DateTimeFormat('ko-KR', {
+      timeZone: 'Asia/Seoul', year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+    });
+    return Object.fromEntries(formatter.formatToParts(new Date(millis)).map((part) => [part.type, part.value]));
+  }
+
+  function formatMailTime(millis) {
+    const parts = seoulParts(millis);
+    const yearLabel = parts.year === seoulParts(Date.now()).year ? '' : `${parts.year}년 `;
+    return `${yearLabel}${Number(parts.month)}월 ${Number(parts.day)}일 ${parts.hour}:${parts.minute}`;
+  }
+
+  function mailSummary(message) {
+    const headers = message.payload && message.payload.headers;
+    return {
+      id: message.id,
+      threadId: message.threadId,
+      sender: parseSender(headerValue(headers, 'From')),
+      subject: headerValue(headers, 'Subject') || '(제목 없음)',
+      receivedAt: Number(message.internalDate),
+      snippet: decodeHtmlEntities(message.snippet || ''),
+      unread: (message.labelIds || []).includes('UNREAD')
+    };
+  }
+
+  function gmailUrl(path, params) {
+    const url = new URL(`${GMAIL_API}/${path}`);
+    Object.entries(params || {}).forEach(([name, value]) => {
+      [].concat(value).forEach((item) => {
+        if (item !== null && item !== undefined && item !== '') url.searchParams.append(name, item);
+      });
+    });
+    return url;
+  }
+
+  async function readGmailErrorDetail(response) {
+    try {
+      return JSON.stringify(await response.json());
+    } catch {
+      return '';
+    }
+  }
+
+  async function requestGmail(path, params) {
+    if (!gmailToken) throw new GmailError(401);
+    let response;
+    try {
+      response = await fetch(gmailUrl(path, params), { headers: { Authorization: `Bearer ${gmailToken}` } });
+    } catch {
+      throw new GmailError(0);
+    }
+    if (response.ok) return response.json();
+    throw new GmailError(response.status, await readGmailErrorDetail(response));
+  }
+
+  async function mapWithLimit(items, limit, worker) {
+    const results = new Array(items.length);
+    let nextIndex = 0;
+    async function drain() {
+      while (nextIndex < items.length) {
+        const index = nextIndex;
+        nextIndex += 1;
+        results[index] = await worker(items[index]);
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(limit, items.length) }, drain));
+    return results;
+  }
+
+  function fetchMailSummary(id) {
+    return requestGmail(`messages/${id}`, { format: 'metadata', metadataHeaders: GMAIL_SUMMARY_HEADERS }).then(mailSummary);
+  }
+
+  async function fetchInquiryPage(pageToken) {
+    const list = await requestGmail('messages', { q: GMAIL_QUERIES[gmail.mode], maxResults: GMAIL_PAGE_SIZE, pageToken });
+    const ids = (list.messages || []).map((message) => message.id);
+    const rows = await mapWithLimit(ids, GMAIL_FETCH_CONCURRENCY, fetchMailSummary);
+    return { rows, nextPageToken: list.nextPageToken || null };
+  }
+
+  function flattenParts(part) {
+    return [part, ...(part.parts || []).flatMap(flattenParts)];
+  }
+
+  function partCharset(part) {
+    const contentType = headerValue(part.headers, 'Content-Type');
+    const match = contentType.match(/charset="?([\w-]+)/i);
+    return match ? match[1] : 'utf-8';
+  }
+
+  function decodePartText(part) {
+    return decodeBytes(base64ToBytes(part.body.data), partCharset(part));
+  }
+
+  function hasInlineText(part, mimeType) {
+    return part.mimeType === mimeType && !part.filename && Boolean(part.body && part.body.data);
+  }
+
+  function htmlToPlainText(html) {
+    const document_ = new DOMParser().parseFromString(html, 'text/html');
+    document_.querySelectorAll('script, style').forEach((node) => node.remove());
+    document_.querySelectorAll('br').forEach((node) => node.replaceWith('\n'));
+    document_.querySelectorAll('p, div, li, tr, h1, h2, h3, h4, h5, h6').forEach((node) => node.append('\n'));
+    return document_.body.textContent;
+  }
+
+  function tidyMailText(text) {
+    return text.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  function pickBodyText(payload) {
+    const parts = flattenParts(payload);
+    const plain = parts.find((part) => hasInlineText(part, 'text/plain'));
+    if (plain) return tidyMailText(decodePartText(plain));
+    const html = parts.find((part) => hasInlineText(part, 'text/html'));
+    if (html) return tidyMailText(htmlToPlainText(decodePartText(html)));
+    return '';
+  }
+
+  function collectAttachmentNames(payload) {
+    return flattenParts(payload).filter((part) => part.filename).map((part) => part.filename);
+  }
+
+  function mailContent(message) {
+    return { body: pickBodyText(message.payload), attachments: collectAttachmentNames(message.payload) };
+  }
+
+  function isAdminMailbox(profile) {
+    return String(profile.emailAddress || '').toLowerCase() === GMAIL_ADMIN_ADDRESS;
+  }
+
+  function hasGrantedGmailScope(response) {
+    return google.accounts.oauth2.hasGrantedAllScopes(response, GMAIL_SCOPE);
+  }
+
+  function isPermissionFailure(error) {
+    return error.status === 403 && /insufficient|scope/i.test(error.detail);
+  }
+
+  function describeTokenError(code) {
+    if (code === 'access_denied') return 'Gmail 읽기 권한을 허용해 주세요';
+    return '연결하지 못했어요. 다시 시도해 주세요';
+  }
+
+  function connectPromptButton() {
+    return el('button', { class: 'btn btn-primary', type: 'button', onclick: connectGmail, text: 'Gmail 연결하기' });
+  }
+
+  function renderConnectPrompt(errorMessage) {
+    clear($('panel-inquiries')).append(
+      errorMessage && notice(errorMessage),
+      el('div', { class: 'empty' },
+        el('b', { text: 'Gmail을 연결해 주세요' }),
+        '메일을 읽기만 하고, 어디에도 저장하지 않아요.',
+        el('div', { class: 'empty-action' }, connectPromptButton())));
+  }
+
+  function renderUnconfiguredPrompt() {
+    clear($('panel-inquiries')).append(emptyState('Gmail 연결 설정이 아직 안 됐어요'));
+  }
+
+  function gmailClient() {
+    if (!gmailTokenClient) {
+      gmailTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GMAIL_OAUTH_CLIENT_ID,
+        scope: GMAIL_SCOPE,
+        hint: GMAIL_ADMIN_ADDRESS,
+        callback: handleTokenResponse,
+        error_callback: handleTokenPopupError
+      });
+    }
+    return gmailTokenClient;
+  }
+
+  function connectGmail() {
+    if (!isGoogleIdentityReady()) return renderConnectPrompt('Google 연결 도구를 불러오지 못했어요. 새로고침해 주세요');
+    gmailClient().requestAccessToken();
+  }
+
+  function handleTokenPopupError(error) {
+    if (error.type === 'popup_failed_to_open') return renderConnectPrompt('팝업이 막혀 있어요. 팝업을 허용해 주세요');
+    renderConnectPrompt();
+  }
+
+  async function handleTokenResponse(response) {
+    if (response.error) return renderConnectPrompt(describeTokenError(response.error));
+    if (!hasGrantedGmailScope(response)) return renderConnectPrompt('Gmail 읽기 권한을 허용해 주세요');
+    gmailToken = response.access_token;
+    await admitAdminMailbox();
+  }
+
+  async function admitAdminMailbox() {
+    try {
+      const profile = await requestGmail('profile');
+      if (isAdminMailbox(profile)) return openInquiryList();
+      forgetGmail();
+      renderConnectPrompt('관리자 메일 계정으로 연결해 주세요');
+    } catch (error) {
+      handleGmailFailure(error);
+    }
+  }
+
+  function handleGmailFailure(error) {
+    if (error.status === 401) {
+      forgetGmail();
+      return renderConnectPrompt('연결이 만료됐어요. 다시 연결해 주세요');
+    }
+    if (isPermissionFailure(error)) {
+      forgetGmail();
+      return renderConnectPrompt('Gmail 읽기 권한을 허용해 주세요');
+    }
+    gmail.loading = false;
+    gmail.failure = error.status === 0 ? '네트워크 연결을 확인해 주세요' : '메일을 불러오지 못했어요. 잠시 후 다시 시도해 주세요';
+    renderInquiryList();
+  }
+
+  function changeInquiryMode(mode) {
+    if (mode === gmail.mode) return;
+    gmail.mode = mode;
+    resetGmailView();
+    openInquiryList();
+  }
+
+  function inquiryToolbar() {
+    const modeButtons = GMAIL_MODE_LABELS.map(([mode, label]) => segmentedButton(label, gmail.mode === mode, () => changeInquiryMode(mode)));
+    return el('div', { class: 'toolbar' },
+      el('h2', { text: '문의' }),
+      el('div', { class: 'spacer' }),
+      el('div', { class: 'seg' }, modeButtons),
+      el('button', { class: 'btn btn-small', type: 'button', onclick: disconnectGmail, text: '연결 해제' }));
+  }
+
+  function openInquiryList() {
+    clear($('panel-inquiries')).append(inquiryToolbar(), el('div', { class: 'list', id: 'inquiry-list' }));
+    loadInquiries(false);
+  }
+
+  async function loadInquiries(append) {
+    const requestId = ++gmail.requestId;
+    if (!append) {
+      gmail.rows = [];
+      gmail.nextPageToken = null;
+    }
+    gmail.loading = true;
+    gmail.failure = null;
+    renderInquiryList();
+    try {
+      const page = await fetchInquiryPage(append ? gmail.nextPageToken : null);
+      if (requestId !== gmail.requestId) return;
+      gmail.rows = gmail.rows.concat(page.rows);
+      gmail.nextPageToken = page.nextPageToken;
+      gmail.loading = false;
+      renderInquiryList();
+    } catch (error) {
+      if (requestId === gmail.requestId) handleGmailFailure(error);
+    }
+  }
+
+  function retryInquiries() {
+    loadInquiries(gmail.rows.length > 0 && Boolean(gmail.nextPageToken));
+  }
+
+  function loadMoreInquiries() {
+    loadInquiries(true);
+  }
+
+  async function loadMailDetail(id) {
+    const requestId = gmail.requestId;
+    gmail.details[id] = { status: 'loading' };
+    renderInquiryList();
+    try {
+      const message = await requestGmail(`messages/${id}`, { format: 'full' });
+      if (requestId !== gmail.requestId) return;
+      gmail.details[id] = { status: 'ready', ...mailContent(message) };
+      renderInquiryList();
+    } catch (error) {
+      if (requestId !== gmail.requestId) return;
+      gmail.details[id] = { status: 'failed', message: error.status === 0 ? '네트워크 연결을 확인해 주세요' : '본문을 불러오지 못했어요' };
+      if (error.status === 401 || isPermissionFailure(error)) return handleGmailFailure(error);
+      renderInquiryList();
+    }
+  }
+
+  function toggleMail(id) {
+    gmail.openId = gmail.openId === id ? null : id;
+    renderInquiryList();
+    const detail = gmail.details[id];
+    if (gmail.openId === id && (!detail || detail.status === 'failed')) loadMailDetail(id);
+  }
+
+  function gmailThreadUrl(row) {
+    return `https://mail.google.com/mail/u/?authuser=${encodeURIComponent(GMAIL_ADMIN_ADDRESS)}#all/${row.threadId}`;
+  }
+
+  function replyUrl(row) {
+    const subject = /^re:/i.test(row.subject) ? row.subject : `Re: ${row.subject}`;
+    return `mailto:${row.sender.address}?subject=${encodeURIComponent(subject)}`;
+  }
+
+  function mailActions(row) {
+    return el('div', { class: 'mail-actions' },
+      el('a', { class: 'btn btn-small', href: gmailThreadUrl(row), target: '_blank', rel: 'noopener', text: 'Gmail에서 열기' }),
+      el('a', { class: 'btn btn-small btn-primary', href: replyUrl(row), text: '답장하기' }));
+  }
+
+  function attachmentChips(names) {
+    if (!names.length) return null;
+    return el('div', { class: 'chips' }, el('span', { class: 'review-meta', text: '첨부 파일' }), names.map((name) => el('span', { class: 'chip', text: name })));
+  }
+
+  function mailSenderLine(row) {
+    return el('div', { class: 'review-meta', text: `${row.sender.name ? `${row.sender.name} ` : ''}<${row.sender.address}> · ${formatDateTime(row.receivedAt)}` });
+  }
+
+  function mailDetailBody(row) {
+    const detail = gmail.details[row.id];
+    if (!detail || detail.status === 'loading') return skeletons(1, 'skeleton-row');
+    if (detail.status === 'failed') {
+      return [
+        el('div', { class: 'row-error', role: 'alert', text: detail.message }),
+        el('div', {}, el('button', { class: 'btn btn-small', type: 'button', onclick: () => loadMailDetail(row.id), text: '다시 시도' }))
+      ];
+    }
+    return [
+      el('p', { class: detail.body ? 'mail-body' : 'mail-body review-comment is-empty', text: detail.body || '(본문 없음)' }),
+      attachmentChips(detail.attachments)
+    ];
+  }
+
+  function mailDetail(row) {
+    return el('div', { class: 'mail-detail' }, mailSenderLine(row), mailDetailBody(row), mailActions(row));
+  }
+
+  function mailRowButton(row, isOpen) {
+    const senderName = row.sender.name || row.sender.address;
+    return el('button', { class: 'mail-row', type: 'button', 'aria-expanded': String(isOpen), onclick: () => toggleMail(row.id) },
+      el('span', row.unread ? { class: 'mail-dot is-unread', role: 'img', 'aria-label': '읽지 않음', title: '읽지 않음' } : { class: 'mail-dot', 'aria-hidden': 'true' }),
+      el('span', { class: 'mail-main' },
+        el('span', { class: 'mail-from' }, el('strong', { text: senderName }), row.sender.name && el('span', { text: row.sender.address })),
+        el('span', { class: 'mail-subject', text: row.subject }),
+        el('span', { class: 'mail-snippet', text: row.snippet })),
+      el('span', { class: 'mail-date', text: formatMailTime(row.receivedAt) }));
+  }
+
+  function mailItem(row) {
+    const isOpen = gmail.openId === row.id;
+    return el('article', { class: isOpen ? 'mail is-open' : 'mail' }, mailRowButton(row, isOpen), isOpen && mailDetail(row));
+  }
+
+  function inquiryEmptyState() {
+    if (gmail.mode === 'inbox') return emptyState('받은편지함이 비어 있어요');
+    return emptyState('아직 문의 메일이 없어요', '제목이 "[화:답] 문의/건의"인 메일이 오면 여기에 보여요.');
+  }
+
+  function inquiryFailureBlock() {
+    return el('div', { class: 'mail-more' },
+      el('div', { class: 'row-error', role: 'alert', text: gmail.failure }),
+      el('button', { class: 'btn btn-small', type: 'button', onclick: retryInquiries, text: '다시 시도' }));
+  }
+
+  function moreInquiriesButton() {
+    return el('div', { class: 'mail-more' }, el('button', { class: 'btn', type: 'button', onclick: loadMoreInquiries, text: '더 보기' }));
+  }
+
+  function inquiryListContent() {
+    const isEmpty = gmail.rows.length === 0;
+    if (gmail.loading && isEmpty) return skeletons(3, 'skeleton-row');
+    if (isEmpty && !gmail.failure) return [inquiryEmptyState()];
+    return [
+      gmail.rows.map(mailItem),
+      gmail.loading && skeletons(1, 'skeleton-row'),
+      gmail.failure && inquiryFailureBlock(),
+      gmail.nextPageToken && !gmail.loading && !gmail.failure && moreInquiriesButton()
+    ];
+  }
+
+  function renderInquiryList() {
+    const list = $('inquiry-list');
+    if (list) appendChildren(clear(list), inquiryListContent());
+  }
+
+  function loadInquiriesPanel() {
+    if (!GMAIL_OAUTH_CLIENT_ID) return renderUnconfiguredPrompt();
+    renderConnectPrompt();
+  }
+
   const TAB_LOADERS = {
     dashboard: loadDashboard,
     parse: loadParseQuality,
     reviews: loadReviewsPanel,
-    users: loadUsersPanel
+    users: loadUsersPanel,
+    inquiries: loadInquiriesPanel
   };
 
   function bindStaticControls() {
