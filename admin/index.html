@@ -1785,8 +1785,8 @@
       el('h3', { text: '버전' }),
       currentVersionFacts(),
       el('div', { class: 'form-grid' },
-        versionRow('최소 지원 버전 (versionCode)', 'min-version', 'minVersion', '최소 지원 버전보다 낮은 앱은 업데이트 전까지 사용할 수 없어요'),
-        versionRow('최신 버전 (versionCode)', 'latest-version', 'latestVersion', '최신 버전보다 낮은 앱에는 업데이트 안내 배너가 떠요')));
+        versionRow('최소 지원 버전 (versionCode)', 'min-version', 'minVersion', "최소 지원 버전보다 낮은 앱에는 앱을 켤 때마다 '업데이트가 필요해요' 팝업이 떠요 (닫을 수 있어요)"),
+        versionRow('최신 버전 (versionCode)', 'latest-version', 'latestVersion', "최신 버전보다 낮은 앱에는 '새 버전이 나왔어요' 알림이 버전마다 한 번 떠요")));
   }
 
   function noticeActiveToggle() {
@@ -1846,7 +1846,7 @@
 
   function raiseConfirmBlock() {
     return el('div', { class: 'callout', role: 'alert' },
-      el('div', {}, el('b', { text: '최소 지원 버전을 올려요. ' }), `버전 ${formatNumber(Number(state.appConfig.form.minVersion))}보다 낮은 앱은 업데이트 전까지 사용할 수 없게 돼요. 계속할까요?`),
+      el('div', {}, '최소 버전을 올리면 그보다 낮은 앱 사용자에게 앱을 켤 때마다 업데이트 팝업이 떠요. 계속할까요?'),
       el('div', { class: 'save-bar' },
         el('button', { class: 'btn btn-danger', type: 'button', onclick: submitAppConfig, text: '올리고 저장' }),
         el('button', { class: 'btn', type: 'button', onclick: cancelRaiseConfirm, text: '취소' })));
