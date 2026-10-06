@@ -432,8 +432,10 @@
     ['missing_groom_name', '신랑 이름'],
     ['missing_bride_name', '신부 이름'],
     ['missing_event_at', '예식 일시'],
+    ['missing_event_time', '예식 시간'],
     ['missing_venue_name', '식장명'],
     ['missing_venue_address', '식장 주소'],
+    ['missing_hall_detail', '층/홀'],
     ['missing_accounts', '계좌']
   ];
   const ACTIVITY_SERIES = [
@@ -802,6 +804,10 @@
     return { name: 'good', label: '양호', icon: '●' };
   }
 
+  function partialLevel() {
+    return { name: 'warning', label: '확인 필요', icon: '◆' };
+  }
+
   function levelFlag(level) {
     return el('div', { class: 'tile-flag' },
       el('span', { style: `color:var(--status-${level.name})`, 'aria-hidden': 'true', text: level.icon }), level.label);
@@ -827,6 +833,8 @@
 
   function overviewTiles(row) {
     const failureRate = Number(row.parse_failure_rate_30d || 0);
+    const hasPartialRate = row.parse_partial_rate_30d !== undefined && row.parse_partial_rate_30d !== null;
+    const partialRate = Number(row.parse_partial_rate_30d || 0);
     return [
       reportTile(row),
       tile('전체 가입자', formatNumber(row.total_users), `최근 7일 +${formatNumber(row.users_last_7d)} · 30일 +${formatNumber(row.users_last_30d)}`),
@@ -834,7 +842,8 @@
       tile('축의금 기록', formatNumber(row.total_ledger_entries), `최근 30일 +${formatNumber(row.ledger_last_30d)}`),
       tile('식장 후기', formatNumber(row.total_reviews), `숨김 ${formatNumber(row.hidden_reviews)}건`),
       tile('링크 파싱 (30일)', formatNumber(row.parse_logs_last_30d), '고유 링크 기준'),
-      tile('링크 파싱 실패율 (30일)', formatPercent(failureRate), null, levelFlag(failureLevel(failureRate)))
+      tile('링크 파싱 실패율 (30일)', formatPercent(failureRate), null, levelFlag(failureLevel(failureRate))),
+      hasPartialRate && tile('링크 파싱 일부 누락 (30일)', formatPercent(partialRate), '핵심 항목 중 일부를 못 읽은 비율', partialRate > 0 && levelFlag(partialLevel()))
     ];
   }
 
@@ -877,6 +886,29 @@
     return row.total ? Number(row.parsed_count) / Number(row.total) : 0;
   }
 
+  function hasPartialColumns(row) {
+    return row.complete_count !== undefined && row.complete_count !== null
+      && row.partial_count !== undefined && row.partial_count !== null;
+  }
+
+  function completeRate(row) {
+    return row.total ? Number(row.complete_count) / Number(row.total) : 0;
+  }
+
+  function partialRate(row) {
+    return row.total ? Number(row.partial_count) / Number(row.total) : 0;
+  }
+
+  function partialCell(row) {
+    if (!hasPartialColumns(row)) return el('td', { class: 'num dim', text: '–' });
+    const rate = partialRate(row);
+    if (rate === 0) return el('td', { class: 'num dim', text: '–' });
+    return el('td', { class: 'num' },
+      el('span', { class: 'rate rate-warning' },
+        el('span', { class: 'rate-label', text: formatPercent(rate) }),
+        el('span', { class: 'badge badge-warning' }, el('span', { 'aria-hidden': 'true', text: partialLevel().icon }), partialLevel().label)));
+  }
+
   function failureRate(row) {
     return row.total ? Number(row.failure_count) / Number(row.total) : 0;
   }
@@ -903,7 +935,8 @@
       el('td', { text: SOURCE_LABELS[row.source] || row.source }),
       countCell(row.total),
       countCell(row.total_attempts),
-      el('td', { class: 'num', text: formatPercent(successRate(row)) }),
+      el('td', { class: 'num', text: formatPercent(hasPartialColumns(row) ? completeRate(row) : successRate(row)) }),
+      partialCell(row),
       failureCell(row),
       countCell(row.low_confidence_count),
       MISSING_COLUMNS.map(([key]) => countCell(row[key])));
@@ -915,7 +948,8 @@
       el('th', { text: '출처' }),
       el('th', { class: 'num', text: '건수' }),
       el('th', { class: 'num', text: '시도' }),
-      el('th', { class: 'num', text: '성공률' }),
+      el('th', { class: 'num', text: rows.every(hasPartialColumns) ? '완전 성공' : '성공률' }),
+      el('th', { class: 'num', text: '일부 누락' }),
       el('th', { class: 'num', text: '실패율' }),
       el('th', { class: 'num', text: '낮은 신뢰' }),
       MISSING_COLUMNS.map(([, label]) => el('th', { class: 'num', text: `${label} 누락` })));
