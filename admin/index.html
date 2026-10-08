@@ -371,6 +371,16 @@
   .metric dd { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.25; font-variant-numeric: tabular-nums; }
   .metric dd.dim { color: var(--ink-faint); }
   .parse-card-chips { padding: 0 14px 12px; }
+  .parse-sort { margin: 0 0 10px; }
+  .parse-nested { display: grid; gap: 10px; padding: 10px; border-top: 1px solid var(--border); background: var(--surface-2); }
+  .others-cell { padding: 0; }
+  .others-cell .domain-toggle { padding: 10px 12px; }
+  .row-nested > td:first-child { padding-left: 28px; }
+  .others-count { color: var(--ink-faint); font-weight: 500; }
+  .log-delete { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+  .btn-text-danger { border: 0; background: transparent; color: var(--danger-ink); font-weight: 600; padding: 4px 8px; min-height: 32px; border-radius: 6px; }
+  .btn-text-danger:hover { background: var(--danger-bg); }
+  .btn-text-danger:disabled { opacity: 0.5; cursor: default; }
   .parse-card .log-detail { border-top: 1px solid var(--border); background: var(--surface-2); }
 
   .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -402,7 +412,7 @@
     .who { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; text-align: right; font-size: 12px; }
     .spacer { display: none; }
     #logout { flex: none; padding-inline: 10px; }
-    .btn, .field, .btn-small, .seg button, .filter-chip { min-height: 40px; }
+    .btn, .field, .btn-small, .seg button, .filter-chip, .btn-text-danger { min-height: 40px; }
     .tabs { flex-wrap: nowrap; gap: 8px; padding-block: 2px 10px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin-inline: -16px; padding-inline: 16px; }
     .tabs::-webkit-scrollbar { display: none; }
     .tab { flex: none; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); padding: 6px 16px; }
@@ -527,6 +537,11 @@
   const CONFIDENCE_LABELS = { high: '높음', medium: '보통', low: '낮음' };
   const PARSE_LOG_LIMIT = 50;
   const SERVER_UPDATE_MESSAGE = '서버 업데이트 후 볼 수 있어요';
+  const SERVER_UPDATE_MESSAGE_FOR_USE = '서버 업데이트 후 쓸 수 있어요';
+  const SMALL_DOMAIN_MAX_TOTAL = 2;
+  const SMALL_DOMAIN_GROUP_MIN = 2;
+  const OTHERS_KEY = 'others';
+  const PARSE_SORTS = [['problem', '문제 많은 순'], ['count', '건수 순'], ['name', '이름 순']];
   const ACTIVITY_SERIES = [
     { key: 'signups', label: '가입', color: 'var(--series-blue)' },
     { key: 'invites', label: '청첩장 등록', color: 'var(--series-orange)' },
@@ -544,7 +559,7 @@
     activityRows: [],
     activityAsTable: false,
     reviews: { search: '', includeHidden: true, reportedOnly: false, hiddenOnly: false, offset: 0, rows: [], hasNext: false, confirmId: null, confirmAction: null, errors: {}, requestId: 0, selected: new Set(), bulk: { action: null, confirming: false, done: 0, total: 0 } },
-    parse: { rows: [], open: new Map() },
+    parse: { rows: [], open: new Map(), sort: 'problem', othersOpen: false, confirmKey: null, deleting: false },
     appConfig: { row: null, form: null, confirmRaise: false, saving: false, savedAt: null, errors: [], requestId: 0 },
     userRequestId: 0
   };
@@ -684,7 +699,7 @@
     state.loadedTabs.clear();
     state.activityRows = [];
     state.reviews = { ...state.reviews, reportedOnly: false, hiddenOnly: false, offset: 0, rows: [], hasNext: false, confirmId: null, confirmAction: null, errors: {}, selected: new Set(), bulk: { action: null, confirming: false, done: 0, total: 0 } };
-    state.parse = { rows: [], open: new Map() };
+    state.parse = { rows: [], open: new Map(), sort: 'problem', othersOpen: false, confirmKey: null, deleting: false };
     state.appConfig = { row: null, form: null, confirmRaise: false, saving: false, savedAt: null, errors: [], requestId: state.appConfig.requestId + 1 };
     forgetGmail();
     document.querySelectorAll('[data-panel]').forEach(clear);
@@ -1078,11 +1093,51 @@
     return el('tr', {}, el('td', { class: 'detail-cell', colspan: columnCount }, parseDetail(row, 'table')));
   }
 
-  function parseRowGroup(row, columnCount) {
-    return [parseRow(row), isParseOpen(row) && parseDetailRow(row, columnCount)];
+  function parseRowGroup(row, columnCount, nested) {
+    const main = parseRow(row);
+    if (nested) main.classList.add('row-nested');
+    return [main, isParseOpen(row) && parseDetailRow(row, columnCount)];
   }
 
-  function parseTable(rows) {
+  function problemCount(row) {
+    return Number(row.failure_count || 0) + (hasPartialColumns(row) ? Number(row.partial_count) : 0);
+  }
+
+  const PARSE_COMPARATORS = {
+    problem: (a, b) => problemCount(b) - problemCount(a) || Number(b.total || 0) - Number(a.total || 0),
+    count: (a, b) => Number(b.total || 0) - Number(a.total || 0),
+    name: (a, b) => parseDomainLabel(a).localeCompare(parseDomainLabel(b))
+  };
+
+  function isSmallDomain(row) {
+    return Boolean(row.domain) && Number(row.total || 0) <= SMALL_DOMAIN_MAX_TOTAL;
+  }
+
+  function splitParseRows(rows) {
+    const sorted = [...rows].sort(PARSE_COMPARATORS[state.parse.sort]);
+    const small = sorted.filter(isSmallDomain);
+    if (small.length < SMALL_DOMAIN_GROUP_MIN) return { main: sorted, small: [] };
+    return { main: sorted.filter((row) => !isSmallDomain(row)), small };
+  }
+
+  function othersLabel(small) {
+    return `기타 도메인 ${formatNumber(small.length)}개`;
+  }
+
+  function othersToggle(small, view) {
+    return el('button', {
+      class: 'domain-toggle', type: 'button', 'data-parse-key': OTHERS_KEY, 'data-parse-view': view,
+      'aria-expanded': String(state.parse.othersOpen), onclick: toggleOthers
+    }, el('span', { class: 'caret', 'aria-hidden': 'true', text: '▶' }), el('span', { class: 'domain', text: othersLabel(small) }),
+      el('span', { class: 'others-count', text: `기록 ${formatNumber(sumOf(small, 'total'))}건` }));
+  }
+
+  function othersTableRows(small, columnCount) {
+    const head = el('tr', {}, el('td', { class: 'others-cell', colspan: columnCount }, othersToggle(small, 'table')));
+    return state.parse.othersOpen ? [head, ...small.flatMap((row) => parseRowGroup(row, columnCount, true))] : [head];
+  }
+
+  function parseTable(rows, main, small) {
     const columnCount = 8 + MISSING_COLUMNS.length;
     const head = el('tr', {},
       el('th', { text: '도메인' }),
@@ -1095,7 +1150,7 @@
       el('th', { class: 'num', text: '낮은 신뢰' }),
       MISSING_COLUMNS.map(([, label]) => el('th', { class: 'num', text: `${label} 누락` })));
     return el('div', { class: 'table-wrap parse-table' },
-      el('table', {}, el('thead', {}, head), el('tbody', {}, rows.flatMap((row) => parseRowGroup(row, columnCount)))));
+      el('table', {}, el('thead', {}, head), el('tbody', {}, [...main.flatMap((row) => parseRowGroup(row, columnCount, false)), ...(small.length > 0 ? othersTableRows(small, columnCount) : [])])));
   }
 
   function metric(label, value, level) {
@@ -1144,8 +1199,20 @@
       parseCardHead(row), parseCardChips(row), isParseOpen(row) && parseDetail(row, 'card'));
   }
 
-  function parseCards(rows) {
-    return el('div', { class: 'parse-cards' }, rows.map(parseCard));
+  function othersCard(small) {
+    return el('article', { class: 'parse-card' },
+      el('button', {
+        class: 'parse-card-head', type: 'button', 'data-parse-key': OTHERS_KEY, 'data-parse-view': 'card',
+        'aria-expanded': String(state.parse.othersOpen), onclick: toggleOthers
+      }, el('div', { class: 'parse-card-title' },
+        el('span', { class: 'caret', 'aria-hidden': 'true', text: '▶' }),
+        el('b', { text: othersLabel(small) }),
+        el('span', { class: 'chip', text: `기록 ${formatNumber(sumOf(small, 'total'))}건` }))),
+      state.parse.othersOpen && el('div', { class: 'parse-nested' }, small.map(parseCard)));
+  }
+
+  function parseCards(main, small) {
+    return el('div', { class: 'parse-cards' }, main.map(parseCard), small.length > 0 && othersCard(small));
   }
 
   function parseTimeLabel(value) {
@@ -1184,21 +1251,81 @@
     return el('ul', { class: 'log-list' }, entry.logs.map(logItem));
   }
 
+  function parseDeleteIdle(row) {
+    return el('div', { class: 'log-delete' },
+      el('button', { class: 'btn-text-danger', type: 'button', onclick: () => askParseDelete(row), text: '삭제' }));
+  }
+
+  function parseDeleteConfirm(row) {
+    const { deleting } = state.parse;
+    return el('div', { class: 'log-delete' },
+      el('span', { class: 'confirm-text', text: `${row.domain} 기록 ${formatNumber(row.total)}건을 지울까요? 되돌릴 수 없어요` }),
+      el('button', { class: 'btn btn-small btn-danger', type: 'button', disabled: deleting, onclick: () => deleteParseDomain(row), text: deleting ? '지우는 중' : '삭제 확인' }),
+      el('button', { class: 'btn btn-small', type: 'button', disabled: deleting, onclick: () => askParseDelete(null), text: '취소' }));
+  }
+
+  function parseDeleteArea(row) {
+    return state.parse.confirmKey === parseKey(row) ? parseDeleteConfirm(row) : parseDeleteIdle(row);
+  }
+
   function parseDetail(row, view) {
     const entry = state.parse.open.get(parseKey(row));
     return el('div', { class: 'log-detail', id: parseDetailId(row, view) },
       el('div', { class: 'log-detail-title', text: `최근 기록 (최대 ${PARSE_LOG_LIMIT}건, 시각은 KST)` }),
-      parseDetailBody(entry));
+      parseDetailBody(entry),
+      parseDeleteArea(row));
+  }
+
+  function parseSortBar() {
+    return el('div', { class: 'filter-chips parse-sort', role: 'group', 'aria-label': '정렬' },
+      PARSE_SORTS.map(([key, label]) => el('button', {
+        class: 'filter-chip', type: 'button', 'data-parse-key': `sort-${key}`, 'data-parse-view': 'sort',
+        'aria-pressed': String(state.parse.sort === key), onclick: () => setParseSort(key), text: label
+      })));
   }
 
   function renderParseList() {
     const list = $('parse-list');
     const focusKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.parseKey : null;
     const focusView = focusKey ? document.activeElement.dataset.parseView : null;
-    clear(list).append(parseTable(state.parse.rows), parseCards(state.parse.rows));
+    const { main, small } = splitParseRows(state.parse.rows);
+    clear(list).append(parseSortBar(), parseTable(state.parse.rows, main, small), parseCards(main, small));
     if (!focusKey) return;
     const toggle = [...list.querySelectorAll('[data-parse-key]')].find((node) => node.dataset.parseKey === focusKey && node.dataset.parseView === focusView);
     if (toggle) toggle.focus();
+  }
+
+  function setParseSort(sort) {
+    state.parse.sort = sort;
+    renderParseList();
+  }
+
+  function toggleOthers() {
+    state.parse.othersOpen = !state.parse.othersOpen;
+    renderParseList();
+  }
+
+  function askParseDelete(row) {
+    state.parse.confirmKey = row ? parseKey(row) : null;
+    renderParseList();
+  }
+
+  function parseDeleteFailureMessage(error) {
+    return isMissingFunction(error) ? SERVER_UPDATE_MESSAGE_FOR_USE : describeError(error);
+  }
+
+  async function deleteParseDomain(row) {
+    state.parse.deleting = true;
+    renderParseList();
+    const { data, error } = await db.rpc('admin_delete_parse_logs_by_domain', { p_domain: row.domain, p_source: row.source });
+    state.parse.deleting = false;
+    state.parse.confirmKey = null;
+    if (error) {
+      showToast(parseDeleteFailureMessage(error));
+      return renderParseList();
+    }
+    showToast(`${row.domain} 기록 ${formatNumber(Number(data) || 0)}건을 지웠어요`);
+    loadParseQuality();
   }
 
   function toggleParseDetail(row) {
@@ -1228,7 +1355,7 @@
 
   async function loadParseQuality() {
     const panel = clear($('panel-parse'));
-    state.parse = { rows: [], open: new Map() };
+    state.parse = { ...state.parse, rows: [], open: new Map(), confirmKey: null, deleting: false };
     panel.append(el('div', { class: 'toolbar' }, el('h2', { text: '파싱 품질 (최근 30일)' })), ...skeletons(4, 'skeleton-row'));
     const { data, error } = await db.rpc('admin_parse_quality');
     clear(panel).append(el('div', { class: 'toolbar' }, el('h2', { text: '파싱 품질 (최근 30일)' })));
