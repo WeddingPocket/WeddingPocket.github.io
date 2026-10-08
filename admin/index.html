@@ -925,8 +925,7 @@
     return el('button', { class: count > 0 ? 'tile tile-link tile-warning' : 'tile tile-link', type: 'button', onclick: openReportedReviews },
       el('div', { class: 'tile-label', text: '처리 대기 신고' }),
       el('div', { class: 'tile-value', text: formatNumber(count) }),
-      count > 0 && el('div', { class: 'tile-flag' }, el('span', { style: 'color:var(--status-warning)', 'aria-hidden': 'true', text: '◆' }), '확인이 필요해요'),
-      el('div', { class: 'tile-sub', text: '눌러서 신고된 후기 보기' }));
+      count > 0 && el('div', { class: 'tile-flag' }, el('span', { style: 'color:var(--status-warning)', 'aria-hidden': 'true', text: '◆' }), '확인이 필요해요'));
   }
 
   function openReportedReviews() {
@@ -951,7 +950,7 @@
       tile('식장 후기', formatNumber(row.total_reviews), `숨김 ${formatNumber(row.hidden_reviews)}건`),
       tile('링크 파싱 (30일)', formatNumber(row.parse_logs_last_30d), '고유 링크 기준'),
       tile('링크 파싱 실패율 (30일)', formatPercent(failureRate), null, levelFlag(failureLevel(failureRate))),
-      hasPartialRate && tile('링크 파싱 일부 누락 (30일)', formatPercent(partialRate), '핵심 항목 중 일부를 못 읽은 비율', partialRate > 0 && levelFlag(partialLevel()))
+      hasPartialRate && tile('링크 파싱 일부 누락 (30일)', formatPercent(partialRate), null, partialRate > 0 && levelFlag(partialLevel()))
     ];
   }
 
