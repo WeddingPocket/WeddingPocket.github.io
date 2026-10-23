@@ -152,7 +152,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero-icon, .hero h1, .hero p.tagline, .hero .eng, .reveal {
+    .hero-icon, .hero h1, .hero p.tagline, .hero .eng, .hero .store-badge-row, .reveal {
       animation: none !important;
       transition: none !important;
       opacity: 1 !important;
@@ -226,6 +226,28 @@
     margin: 0;
   }
 
+  /* ---------- 스토어 배지 ---------- */
+  .store-badge {
+    display: inline-block;
+    margin: -6.6px 0;
+    line-height: 0;
+  }
+  .store-badge img {
+    height: 57.3px;
+    width: auto;
+    display: block;
+  }
+  .hero .store-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+    opacity: 0;
+    animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  }
+
   /* ---------- 법적 고지 링크 ---------- */
   .legal-links {
     padding: 0 0 64px;
@@ -269,6 +291,7 @@
     <h1>화:답</h1>
     <p class="tagline">청첩장 정리부터 축의금 기록, 식장 후기까지<br>한 곳에서</p>
     <p class="eng">HWA : DAP</p>
+    <div class="store-badge-row"><a class="store-badge" href="https://play.google.com/store/apps/details?id=com.hwadap.android" target="_blank" rel="noopener"><img src="/assets/google-play-badge-ko.png" alt="Google Play에서 다운로드"></a></div>
   </div>
 </div>
 
