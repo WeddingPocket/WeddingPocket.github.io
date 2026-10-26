@@ -237,6 +237,15 @@
     width: auto;
     display: block;
   }
+  .store-badge[hidden] {
+    display: none;
+  }
+  .store-badge-apple {
+    margin: 0;
+  }
+  .store-badge-apple img {
+    height: 44px;
+  }
   .hero .store-badge-row {
     display: flex;
     flex-wrap: wrap;
@@ -291,7 +300,7 @@
     <h1>화:답</h1>
     <p class="tagline">청첩장 정리부터 축의금 기록, 식장 후기까지<br>한 곳에서</p>
     <p class="eng">HWA : DAP</p>
-    <div class="store-badge-row"><a class="store-badge" href="https://play.google.com/store/apps/details?id=com.hwadap.android" target="_blank" rel="noopener"><img src="/assets/google-play-badge-ko.png" alt="Google Play에서 다운로드"></a></div>
+    <div class="store-badge-row"><a class="store-badge store-badge-play" href="https://play.google.com/store/apps/details?id=com.hwadap.android" target="_blank" rel="noopener"><img src="/assets/google-play-badge-ko.png" alt="Google Play에서 다운로드"></a><a class="store-badge store-badge-apple" href="https://apps.apple.com/kr/app/id6825202413" target="_blank" rel="noopener"><img src="/assets/app-store-badge-ko.svg" alt="App Store에서 다운로드"></a></div>
   </div>
 </div>
 
@@ -350,6 +359,24 @@
   } else {
     revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
   }
+
+  function detectMobileStore() {
+    var ua = navigator.userAgent;
+    if (/Android/i.test(ua)) return 'play';
+    var isIosDevice = /iPhone|iPad|iPod/i.test(ua);
+    var isIpadDesktopMode = /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
+    if (isIosDevice || isIpadDesktopMode) return 'apple';
+    return null;
+  }
+
+  function hideOtherStoreBadge(store) {
+    var otherClass = store === 'play' ? '.store-badge-apple' : '.store-badge-play';
+    var other = document.querySelector(otherClass);
+    if (other) other.hidden = true;
+  }
+
+  var mobileStore = detectMobileStore();
+  if (mobileStore) hideOtherStoreBadge(mobileStore);
 </script>
 </body>
 </html>
