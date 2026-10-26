@@ -63,7 +63,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   /* ---- 토큰: 라이트(기본) ---- */
   :root {
@@ -217,69 +217,95 @@
     .hero-icon-wrap::before { animation: none !important; }
   }
 
-  /* ---------- 소개 문단 ---------- */
-  .intro {
-    padding: 8px 0 56px;
-  }
-  .intro p {
-    font-size: 1.02rem;
-    line-height: 1.85;
-    color: var(--ink-soft);
-    max-width: 62ch;
+  /* ---------- 앱 화면 ---------- */
+  .phone {
+    width: 240px;
     margin: 0 auto;
-    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    background: var(--surface);
+    box-shadow: 0 24px 48px -24px rgba(177, 60, 88, 0.35);
+    overflow: hidden;
+    line-height: 0;
   }
-
-  /* ---------- 기능 카드 ---------- */
-  .features {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+  .phone img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .hero-screen {
     padding: 0 0 96px;
   }
-  @media (max-width: 640px) {
-    .features { grid-template-columns: 1fr; }
+
+  /* ---------- 기능 구간 ---------- */
+  .section {
+    padding: 80px 0;
   }
-  .feature {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 28px 24px;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+  .section-tint {
+    background: var(--surface-2);
   }
-  .feature:hover {
-    transform: translateY(-5px);
-    border-color: var(--accent-tint);
-    box-shadow: 0 18px 34px -20px rgba(177, 60, 88, 0.4);
+  .section .wrap {
+    max-width: 960px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    text-align: center;
   }
-  .feature .mark {
-    font-family: "Nanum Myeongjo", serif;
-    font-size: 1.6rem;
+  .eyebrow {
+    font-size: 0.9rem;
     font-weight: 700;
-    color: var(--accent);
-    margin-bottom: 14px;
-    display: block;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    color: var(--accent-strong);
+    margin: 0 0 12px;
   }
-  .feature:hover .mark {
-    transform: translateY(-3px) rotate(-4deg);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .feature, .feature .mark { transition: none !important; }
-    .feature:hover { transform: none !important; }
-    .feature:hover .mark { transform: none !important; }
-  }
-  .feature h3 {
-    font-size: 1.02rem;
-    font-weight: 700;
-    margin: 0 0 8px;
+  .section h2,
+  .cta h2 {
+    font-family: "Noto Sans KR", -apple-system, "Malgun Gothic", sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.9rem, 5vw, 2.4rem);
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+    word-break: keep-all;
+    text-wrap: balance;
     color: var(--ink);
   }
-  .feature p {
-    font-size: 0.88rem;
-    line-height: 1.65;
-    color: var(--ink-faint);
-    margin: 0;
+  .section .desc {
+    font-size: 1.02rem;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    max-width: 32ch;
+    margin: 0 auto;
+    word-break: keep-all;
+    text-wrap: balance;
+  }
+  @media (min-width: 900px) {
+    .section .wrap {
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 72px;
+      text-align: left;
+    }
+    .section-reverse .wrap {
+      flex-direction: row-reverse;
+    }
+    .section .copy {
+      flex: 1;
+    }
+    .section .desc {
+      margin: 0;
+    }
+    .phone {
+      width: 300px;
+      flex: none;
+    }
+  }
+
+  /* ---------- 마지막 시작 유도 ---------- */
+  .cta {
+    padding: 88px 0;
+    text-align: center;
+    background: var(--surface-2);
   }
 
   /* ---------- 스토어 배지 ---------- */
@@ -302,13 +328,15 @@
   .store-badge-apple img {
     height: 44px;
   }
-  .hero .store-badge-row {
+  .store-badge-row {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     gap: 12px;
     margin-top: 28px;
+  }
+  .hero .store-badge-row {
     opacity: 0;
     animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
   }
@@ -360,28 +388,49 @@
   </div>
 </div>
 
-<div class="wrap">
-  <div class="intro">
-    <p>결혼식 시즌이 되면 여기저기서 날아오는 청첩장, 누구한테 얼마를 냈는지 헷갈리는 축의금 기록,
-      어느 식장이 괜찮았는지 궁금한 후기까지 — 화:답이 한 곳에서 정리해드립니다.</p>
+<div class="hero-screen reveal">
+  <div class="wrap">
+    <div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="/assets/screens/link-sheet-filled-dark.webp"><img src="/assets/screens/link-sheet-filled-light.webp" alt="청첩장 링크를 붙여넣는 화:답 앱의 링크 입력 화면" width="720" height="778"></picture></div>
+  </div>
+</div>
+
+  <div class="section section-tint reveal">
+    <div class="wrap">
+      <div class="copy">
+        <p class="eyebrow">청첩장 정리</p>
+        <h2>청첩장 받으면<br>링크만 붙여넣으세요</h2>
+        <p class="desc">예식 날짜, 장소, 계좌까지 알아서 정리해 드려요.</p>
+      </div>
+      <div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="/assets/screens/home-dark.webp"><img src="/assets/screens/home-light.webp" alt="예식 캘린더와 다가오는 예식이 보이는 화:답 앱 홈 화면" width="720" height="778" loading="lazy"></picture></div>
+    </div>
   </div>
 
-  <div class="features">
-    <div class="feature reveal" style="transition-delay:0.05s">
-      <span class="mark">壹</span>
-      <h3>청첩장, 자동으로 정리돼요</h3>
-      <p>받은 청첩장 링크 하나만 붙여넣으면 신랑·신부 이름, 예식 일시, 장소, 계좌번호까지 자동으로 정리됩니다.</p>
+  <div class="section section-reverse reveal">
+    <div class="wrap">
+      <div class="copy">
+        <p class="eyebrow">축의금 기록</p>
+        <h2>누구한테 얼마 냈는지<br>이제 안 헷갈려요</h2>
+        <p class="desc">낸 축의금이 한곳에 모이고, 관계별로 다른 사람들은 얼마 냈는지도 보여요.</p>
+      </div>
+      <div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="/assets/screens/ledger-dark.webp"><img src="/assets/screens/ledger-light.webp" alt="낸 축의금 총액과 예식별 기록이 보이는 화:답 앱 장부 화면" width="720" height="778" loading="lazy"></picture></div>
     </div>
-    <div class="feature reveal" style="transition-delay:0.15s">
-      <span class="mark">貳</span>
-      <h3>축의금도 깜빡하지 않게</h3>
-      <p>누구한테 얼마를 냈는지 기록하고, 관계별 평균 축의금까지 한눈에 확인할 수 있어요.</p>
+  </div>
+
+  <div class="section section-tint reveal">
+    <div class="wrap">
+      <div class="copy">
+        <p class="eyebrow">식장 후기</p>
+        <h2>밥은 맛있는지,<br>주차는 편한지</h2>
+        <p class="desc">다녀온 사람들의 후기를 가기 전에 미리 확인하세요.</p>
+      </div>
+      <div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="/assets/screens/venue-reviews-dark.webp"><img src="/assets/screens/venue-reviews-light.webp" alt="식사, 주차, 분위기 평가가 요약된 화:답 앱 식장 후기 화면" width="720" height="778" loading="lazy"></picture></div>
     </div>
-    <div class="feature reveal" style="transition-delay:0.25s">
-      <span class="mark">參</span>
-      <h3>식장 후기도 미리 보고 가요</h3>
-      <p>다녀온 사람들의 후기를 남기고 열람할 수 있어요. 식사, 주차, 분위기까지 미리 알아보세요.</p>
-    </div>
+  </div>
+
+<div class="cta reveal">
+  <div class="wrap">
+    <h2>지금 무료로<br>시작해 보세요</h2>
+    <div class="store-badge-row"><a class="store-badge store-badge-play" href="https://play.google.com/store/apps/details?id=com.hwadap.android" target="_blank" rel="noopener"><img src="/assets/google-play-badge-ko.png" alt="Google Play에서 다운로드"></a><a class="store-badge store-badge-apple" href="https://apps.apple.com/kr/app/id6825202413" target="_blank" rel="noopener"><img src="/assets/app-store-badge-ko.svg" alt="App Store에서 다운로드"></a></div>
   </div>
 </div>
 
@@ -427,8 +476,7 @@
 
   function hideOtherStoreBadge(store) {
     var otherClass = store === 'play' ? '.store-badge-apple' : '.store-badge-play';
-    var other = document.querySelector(otherClass);
-    if (other) other.hidden = true;
+    document.querySelectorAll(otherClass).forEach(function (other) { other.hidden = true; });
   }
 
   var mobileStore = detectMobileStore();
