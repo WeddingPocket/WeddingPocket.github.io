@@ -57,6 +57,43 @@
         "https://play.google.com/store/apps/details?id=com.hwadap.android",
         "https://apps.apple.com/kr/app/id6825202413"
       ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "무료인가요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "네, 지금은 무료로 쓸 수 있어요. 앱 안에 결제나 구독 기능도 없어요."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "어떤 청첩장 링크가 되나요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "모바일 청첩장 링크를 붙여넣으면 신랑·신부 이름, 예식 일시, 장소, 계좌번호를 읽어 와요. 사이트에 따라 못 읽을 수도 있는데, 그럴 땐 청첩장 사진으로 읽거나 직접 입력하면 돼요."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "내 축의금 기록을 다른 사람이 볼 수 있나요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "아니요, 내가 기록한 축의금은 내 계정으로만 볼 수 있어요. 다른 사람에게 보이는 건 관계별 평균처럼 여러 기록을 합친 통계뿐이에요."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "식장 후기는 누가 쓰나요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "앱을 쓰는 회원이 직접 써요. 이미 지난 예식 중 불참이 아니고 축의금을 기록한 예식에만 쓸 수 있고, 이름은 \"김**\"처럼 가려서 보여요."
+          }
+        }
+      ]
     }
   ]
 }
@@ -259,6 +296,7 @@
     margin: 0 0 12px;
   }
   .section h2,
+  .faq h2,
   .cta h2 {
     font-family: "Noto Sans KR", -apple-system, "Malgun Gothic", sans-serif;
     font-weight: 800;
@@ -299,6 +337,52 @@
       width: 300px;
       flex: none;
     }
+  }
+
+  /* ---------- 자주 묻는 질문 ---------- */
+  .faq {
+    padding: 80px 0;
+  }
+  .faq .wrap {
+    max-width: 720px;
+  }
+  .faq h2 {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .faq details {
+    border-bottom: 1px solid var(--border);
+  }
+  .faq summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    list-style: none;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after {
+    content: "+";
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .faq details[open] summary::after { content: "\2212"; }
+  .faq summary:focus-visible {
+    outline: 2px solid var(--accent-tint);
+    outline-offset: 2px;
+  }
+  .faq details p {
+    font-size: 0.96rem;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin: 0 0 20px;
+    word-break: keep-all;
   }
 
   /* ---------- 마지막 시작 유도 ---------- */
@@ -426,6 +510,28 @@
       <div class="phone"><picture><source media="(prefers-color-scheme: dark)" srcset="/assets/screens/venue-reviews-dark.webp"><img src="/assets/screens/venue-reviews-light.webp" alt="식사, 주차, 분위기 평가가 요약된 화:답 앱 식장 후기 화면" width="720" height="778" loading="lazy"></picture></div>
     </div>
   </div>
+
+<div class="faq reveal">
+  <div class="wrap">
+    <h2>자주 묻는 질문</h2>
+      <details>
+        <summary>무료인가요?</summary>
+        <p>네, 지금은 무료로 쓸 수 있어요. 앱 안에 결제나 구독 기능도 없어요.</p>
+      </details>
+      <details>
+        <summary>어떤 청첩장 링크가 되나요?</summary>
+        <p>모바일 청첩장 링크를 붙여넣으면 신랑·신부 이름, 예식 일시, 장소, 계좌번호를 읽어 와요. 사이트에 따라 못 읽을 수도 있는데, 그럴 땐 청첩장 사진으로 읽거나 직접 입력하면 돼요.</p>
+      </details>
+      <details>
+        <summary>내 축의금 기록을 다른 사람이 볼 수 있나요?</summary>
+        <p>아니요, 내가 기록한 축의금은 내 계정으로만 볼 수 있어요. 다른 사람에게 보이는 건 관계별 평균처럼 여러 기록을 합친 통계뿐이에요.</p>
+      </details>
+      <details>
+        <summary>식장 후기는 누가 쓰나요?</summary>
+        <p>앱을 쓰는 회원이 직접 써요. 이미 지난 예식 중 불참이 아니고 축의금을 기록한 예식에만 쓸 수 있고, 이름은 "김**"처럼 가려서 보여요.</p>
+      </details>
+  </div>
+</div>
 
 <div class="cta reveal">
   <div class="wrap">
