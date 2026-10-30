@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>화:답에 청첩장 저장하기</title>
+<meta name="description" content="청첩장 일정·장소·계좌를 화:답에 저장해 두면 축의금 기록까지 한 번에 할 수 있어요.">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://www.hwadap.co.kr/add/">
+<meta name="theme-color" content="#fffaf5">
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fffaf5;
+    --surface: #ffffff;
+    --surface-2: #fdf2f4;
+    --ink: #1f1a24;
+    --ink-soft: rgba(31, 26, 36, 0.62);
+    --ink-faint: rgba(31, 26, 36, 0.4);
+    --accent: #d1546f;
+    --accent-strong: #b13c58;
+    --accent-tint: #eea0af;
+    --gold: #c99a4c;
+    --border: rgba(31, 26, 36, 0.09);
+    --border-soft: rgba(31, 26, 36, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171219;
+      --surface: rgba(255, 255, 255, 0.045);
+      --surface-2: rgba(209, 84, 111, 0.1);
+      --ink: #fffaf5;
+      --ink-soft: rgba(255, 250, 245, 0.68);
+      --ink-faint: rgba(255, 250, 245, 0.42);
+      --accent: #e2758c;
+      --accent-strong: #eea0af;
+      --accent-tint: #8f2f47;
+      --gold: #e0b872;
+      --border: rgba(255, 255, 255, 0.11);
+      --border-soft: rgba(255, 255, 255, 0.07);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171219;
+    --surface: rgba(255, 255, 255, 0.045);
+    --surface-2: rgba(209, 84, 111, 0.1);
+    --ink: #fffaf5;
+    --ink-soft: rgba(255, 250, 245, 0.68);
+    --ink-faint: rgba(255, 250, 245, 0.42);
+    --accent: #e2758c;
+    --accent-strong: #eea0af;
+    --accent-tint: #8f2f47;
+    --gold: #e0b872;
+    --border: rgba(255, 255, 255, 0.11);
+    --border-soft: rgba(255, 255, 255, 0.07);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans KR", -apple-system, "Malgun Gothic", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 480px; width: 100%; margin: 0 auto; padding: 0 24px; }
+
+  .hero {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 64px 0;
+    text-align: center;
+    background: radial-gradient(60% 50% at 50% 0%, var(--surface-2), transparent 70%);
+  }
+  .hero-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 19px;
+    box-shadow: 0 12px 28px -12px rgba(177, 60, 88, 0.35);
+    display: block;
+    margin: 0 auto 24px;
+  }
+  .hero h1 {
+    font-family: "Nanum Myeongjo", serif;
+    font-weight: 800;
+    font-size: clamp(1.7rem, 7vw, 2.1rem);
+    letter-spacing: 0.01em;
+    line-height: 1.35;
+    margin: 0 0 14px;
+    word-break: keep-all;
+    text-wrap: balance;
+  }
+  .hero p.desc {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin: 0 auto;
+    max-width: 30ch;
+    word-break: keep-all;
+    text-wrap: balance;
+  }
+
+  .store-badge {
+    display: inline-block;
+    margin: -6.6px 0;
+    line-height: 0;
+  }
+  .store-badge img {
+    height: 57.3px;
+    width: auto;
+    display: block;
+  }
+  .store-badge[hidden] {
+    display: none;
+  }
+  .store-badge-apple {
+    margin: 0;
+  }
+  .store-badge-apple img {
+    height: 44px;
+  }
+  .store-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .view-invite {
+    display: inline-block;
+    margin-top: 28px;
+    padding: 13px 24px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--accent-strong);
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+  .view-invite[hidden] {
+    display: none;
+  }
+  .view-invite:focus-visible {
+    outline: 2px solid var(--accent-tint);
+    outline-offset: 2px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 0 0 40px;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+  footer a { color: var(--ink-faint); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <img class="hero-icon" alt="" src="/assets/icon-512.png" width="72" height="72">
+    <h1>화:답에 청첩장 저장하기</h1>
+    <p class="desc">청첩장 일정·장소·계좌를 <span style="white-space:nowrap">화:답에</span> 저장해 두면 축의금 기록까지 한 번에 할 수 있어요.</p>
+    <div class="store-badge-row"><a class="store-badge store-badge-play" href="https://play.google.com/store/apps/details?id=com.hwadap.android" target="_blank" rel="noopener"><img src="/assets/google-play-badge-ko.png" alt="Google Play에서 다운로드"></a><a class="store-badge store-badge-apple" href="https://apps.apple.com/kr/app/id6825202413" target="_blank" rel="noopener"><img src="/assets/app-store-badge-ko.svg" alt="App Store에서 다운로드"></a></div>
+    <a class="view-invite" id="view-invite" href="#" rel="noopener" hidden>청첩장 바로 보기</a>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap"><a href="/">화:답 알아보기</a></div>
+</footer>
+
+<script>
+  function readInviteUrl() {
+    var raw = new URLSearchParams(location.search).get('url');
+    if (!raw) return null;
+    try {
+      var parsed = new URL(raw);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function showInviteLink(url) {
+    var link = document.getElementById('view-invite');
+    link.href = url;
+    link.hidden = false;
+  }
+
+  var inviteUrl = readInviteUrl();
+  if (inviteUrl) showInviteLink(inviteUrl);
+
+  function detectMobileStore() {
+    var ua = navigator.userAgent;
+    if (/Android/i.test(ua)) return 'play';
+    var isIosDevice = /iPhone|iPad|iPod/i.test(ua);
+    var isIpadDesktopMode = /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
+    if (isIosDevice || isIpadDesktopMode) return 'apple';
+    return null;
+  }
+
+  function hideOtherStoreBadge(store) {
+    var otherClass = store === 'play' ? '.store-badge-apple' : '.store-badge-play';
+    document.querySelectorAll(otherClass).forEach(function (other) { other.hidden = true; });
+  }
+
+  var mobileStore = detectMobileStore();
+  if (mobileStore) hideOtherStoreBadge(mobileStore);
+</script>
+</body>
+</html>
