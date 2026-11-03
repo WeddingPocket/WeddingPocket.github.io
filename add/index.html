@@ -138,19 +138,6 @@
     margin-top: 28px;
   }
 
-  .store-note {
-    margin: 14px auto 0;
-    max-width: 30ch;
-    font-size: 0.85rem;
-    line-height: 1.6;
-    color: var(--ink-soft);
-    word-break: keep-all;
-    text-wrap: balance;
-  }
-  .store-note[hidden] {
-    display: none;
-  }
-
   .view-invite {
     display: inline-block;
     margin-top: 28px;
@@ -188,7 +175,6 @@
     <h1>화:답에 청첩장 저장하기</h1>
     <p class="desc">청첩장 일정·장소·계좌를 <span style="white-space:nowrap">화:답에</span> 저장해 두면 축의금 기록까지 한 번에 할 수 있어요.</p>
     <div class="store-badge-row"><a class="store-badge store-badge-play" id="badge-play" href="https://play.google.com/store/apps/details?id=com.hwadap.android" target="_blank" rel="noopener"><img src="/assets/google-play-badge-ko.png" alt="Google Play에서 다운로드"></a><a class="store-badge store-badge-apple" id="badge-apple" href="https://apps.apple.com/kr/app/id6825202413" target="_blank" rel="noopener"><img src="/assets/app-store-badge-ko.svg" alt="App Store에서 다운로드"></a></div>
-    <p class="store-note" id="ios-copy-note" hidden>설치 후 화:답을 열면 '복사한 링크'로 청첩장을 바로 추가할 수 있어요</p>
     <a class="view-invite" id="view-invite" href="#" rel="noopener" hidden>청첩장 바로 보기</a>
   </div>
 </div>
@@ -263,63 +249,45 @@
   var PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.hwadap.android';
 
   function buildPlayStoreUrl(inviteUrl, inviteCode) {
-    var referrer = inviteCode ? 'invite_code=' + inviteCode : 'invite_url=' + encodeURIComponent(inviteUrl);
-    return PLAY_STORE_URL + '&referrer=' + encodeURIComponent(referrer);
+    var referrer = inviteUrl ? 'invite_url=' + encodeURIComponent(inviteUrl) : inviteCode ? 'invite_code=' + inviteCode : null;
+    return referrer ? PLAY_STORE_URL + '&referrer=' + encodeURIComponent(referrer) : PLAY_STORE_URL;
   }
 
-  function copyWithHiddenTextarea(text) {
-    var area = document.createElement('textarea');
-    area.value = text;
-    area.setAttribute('readonly', '');
-    area.style.position = 'fixed';
-    area.style.opacity = '0';
-    document.body.appendChild(area);
-    area.select();
-    try { document.execCommand('copy'); } catch (e) {}
-    document.body.removeChild(area);
+  function handOffToPlayStore(inviteUrl, inviteCode) {
+    var playUrl = buildPlayStoreUrl(inviteUrl, inviteCode);
+    document.getElementById('badge-play').href = playUrl;
+    location.replace(playUrl);
   }
 
-  function copyToClipboard(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).catch(function () { copyWithHiddenTextarea(text); });
-      return;
-    }
-    copyWithHiddenTextarea(text);
+  function handOffToAppStore() {
+    location.replace(document.getElementById('badge-apple').href);
   }
 
-  function copyInviteUrlOnAppleBadgeClick(url) {
-    document.getElementById('badge-apple').addEventListener('click', function () {
-      try { copyToClipboard(url); } catch (e) {}
+  function handOffToStore(store, inviteUrl, inviteCode) {
+    if (store === 'play') handOffToPlayStore(inviteUrl, inviteCode);
+    else handOffToAppStore();
+  }
+
+  function showInviteLinkForCode(code) {
+    resolveInviteCode(code).then(function (resolvedUrl) {
+      if (resolvedUrl) showInviteLink(resolvedUrl);
     });
-    document.getElementById('ios-copy-note').hidden = false;
   }
 
-  function handOffInviteToStore(store, inviteUrl, inviteCode) {
-    if (store === 'play') {
-      var playUrl = buildPlayStoreUrl(inviteUrl, inviteCode);
-      document.getElementById('badge-play').href = playUrl;
-      location.replace(playUrl);
-      return;
-    }
-    copyInviteUrlOnAppleBadgeClick(inviteUrl);
-  }
-
-  function continueWithInvite(inviteUrl, inviteCode) {
-    showInviteLink(inviteUrl);
-    if (mobileStore) handOffInviteToStore(mobileStore, inviteUrl, inviteCode);
+  function showInviteLinkOnDesktop(inviteUrl, inviteCode) {
+    if (inviteUrl) showInviteLink(inviteUrl);
+    else if (inviteCode) showInviteLinkForCode(inviteCode);
   }
 
   var mobileStore = detectMobileStore();
-  if (mobileStore) hideOtherStoreBadge(mobileStore);
-
   var inviteCode = readInviteCode();
   var inviteUrl = readInviteUrl();
-  if (inviteUrl) {
-    continueWithInvite(inviteUrl, null);
-  } else if (inviteCode) {
-    resolveInviteCode(inviteCode).then(function (resolvedUrl) {
-      if (resolvedUrl) continueWithInvite(resolvedUrl, inviteCode);
-    });
+
+  if (mobileStore) {
+    hideOtherStoreBadge(mobileStore);
+    handOffToStore(mobileStore, inviteUrl, inviteCode);
+  } else {
+    showInviteLinkOnDesktop(inviteUrl, inviteCode);
   }
 </script>
 </body>
