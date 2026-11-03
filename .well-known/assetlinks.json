@@ -4,7 +4,10 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.hwadap.android",
-      "sha256_cert_fingerprints": ["PLAY_APP_SIGNING_SHA256_TODO"]
+      "sha256_cert_fingerprints": [
+        "24:E0:42:01:D5:68:A8:21:5B:FC:C9:B3:36:AA:7D:B0:92:CC:04:77:84:23:4E:D9:07:10:87:BE:03:68:C8:48",
+        "50:34:CD:AD:04:D2:76:CF:2E:5C:C6:E6:13:75:2F:E0:10:2D:EE:16:05:FD:4D:7A:4E:5D:18:62:5C:4A:B2:0F"
+      ]
     }
   }
 ]
