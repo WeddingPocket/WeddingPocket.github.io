@@ -445,6 +445,7 @@
       <button class="tab" role="tab" data-tab="reviews" aria-selected="false" type="button">후기 관리</button>
       <button class="tab" role="tab" data-tab="users" aria-selected="false" type="button">사용자 조회</button>
       <button class="tab" role="tab" data-tab="inquiries" aria-selected="false" type="button">문의</button>
+      <button class="tab" role="tab" data-tab="qr" aria-selected="false" type="button">QR 주소</button>
       <button class="tab" role="tab" data-tab="settings" aria-selected="false" type="button">앱 설정</button>
     </div>
   </div>
@@ -477,6 +478,7 @@
     <div class="panel" id="panel-reviews" data-panel="reviews" hidden></div>
     <div class="panel" id="panel-users" data-panel="users" hidden></div>
     <div class="panel" id="panel-inquiries" data-panel="inquiries" hidden></div>
+    <div class="panel" id="panel-qr" data-panel="qr" hidden></div>
     <div class="panel" id="panel-settings" data-panel="settings" hidden></div>
   </section>
 </main>
@@ -1793,6 +1795,46 @@
     clear($('panel-users')).append(form, el('div', { id: 'user-result' }, emptyState('이메일로 사용자를 찾아요', '청첩장·장부 내용은 보이지 않고 건수만 확인할 수 있어요.')));
   }
 
+  const SHORT_LINK_BASE_URL = 'https://www.hwadap.co.kr/add/?c=';
+
+  async function copyShortLink(shortUrl) {
+    try {
+      await navigator.clipboard.writeText(shortUrl);
+      showToast('짧은 주소를 복사했어요');
+    } catch (e) {
+      showToast('복사하지 못했어요. 직접 선택해서 복사해 주세요');
+    }
+  }
+
+  function shortLinkResult(code) {
+    const shortUrl = SHORT_LINK_BASE_URL + code;
+    return el('div', { class: 'user-card' },
+      el('h3', { text: shortUrl }),
+      el('button', { class: 'btn btn-primary', type: 'button', text: '복사', onclick: () => copyShortLink(shortUrl) }));
+  }
+
+  async function createShortLink(inviteUrl) {
+    const result = clear($('short-link-result'));
+    result.append(...skeletons(1, 'skeleton-row'));
+    const { data, error } = await db.rpc('admin_create_invite_short_link', { p_url: inviteUrl });
+    clear(result);
+    if (error) return result.append(notice(describeError(error)));
+    result.append(shortLinkResult(data));
+  }
+
+  function submitShortLink(event) {
+    event.preventDefault();
+    const inviteUrl = new FormData(event.target).get('url').trim();
+    if (inviteUrl) createShortLink(inviteUrl);
+  }
+
+  function loadShortLinkPanel() {
+    const form = el('form', { class: 'toolbar', onsubmit: submitShortLink },
+      el('input', { class: 'field field-grow', name: 'url', type: 'url', required: true, placeholder: '청첩장 주소 (https://...)', 'aria-label': '청첩장 주소', autocomplete: 'off' }),
+      el('button', { class: 'btn btn-primary', type: 'submit', text: '만들기' }));
+    clear($('panel-qr')).append(el('div', { class: 'toolbar' }, el('h2', { text: 'QR 짧은 주소 만들기' })), form, el('div', { id: 'short-link-result' }, emptyState('청첩장 주소를 붙여넣어 주세요', '같은 주소는 항상 같은 짧은 주소가 나와요.')));
+  }
+
   class GmailError extends Error {
     constructor(status, detail) {
       super(`gmail ${status}`);
@@ -2541,6 +2583,7 @@
     parse: loadParseQuality,
     reviews: loadReviewsPanel,
     users: loadUsersPanel,
+    qr: loadShortLinkPanel,
     inquiries: loadInquiriesPanel,
     settings: loadAppSettingsPanel
   };
