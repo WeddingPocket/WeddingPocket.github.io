@@ -198,6 +198,15 @@
 </footer>
 
 <script>
+  var SUPABASE_URL = 'https://jalaozbxqwikwvvltekc.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphbGFvemJ4cXdpa3d2dmx0ZWtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MzY4MTYsImV4cCI6MjEwMTQxMjgxNn0.mlAtqCDrUyetvUFgQ3uKoGzaPvZAhZFx6ZFbKkbCHlI';
+  var INVITE_CODE_PATTERN = /^[a-hj-km-np-z2-9]{6}$/;
+
+  function readInviteCode() {
+    var raw = (new URLSearchParams(location.search).get('c') || '').trim();
+    return INVITE_CODE_PATTERN.test(raw) ? raw : null;
+  }
+
   function readInviteUrl() {
     var raw = new URLSearchParams(location.search).get('url');
     if (!raw) return null;
@@ -209,14 +218,33 @@
     }
   }
 
+  function resolveInviteCode(code) {
+    return fetch(SUPABASE_URL + '/rest/v1/rpc/resolve_invite_short_link', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ p_code: code })
+    }).then(function (response) {
+      return response.ok ? response.json() : null;
+    }).then(function (value) {
+      if (typeof value !== 'string') return null;
+      try {
+        var parsed = new URL(value);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : null;
+      } catch (e) {
+        return null;
+      }
+    }).catch(function () { return null; });
+  }
+
   function showInviteLink(url) {
     var link = document.getElementById('view-invite');
     link.href = url;
     link.hidden = false;
   }
-
-  var inviteUrl = readInviteUrl();
-  if (inviteUrl) showInviteLink(inviteUrl);
 
   function detectMobileStore() {
     var ua = navigator.userAgent;
@@ -234,8 +262,9 @@
 
   var PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.hwadap.android';
 
-  function buildPlayStoreUrl(url) {
-    return PLAY_STORE_URL + '&referrer=' + encodeURIComponent('invite_url=' + encodeURIComponent(url));
+  function buildPlayStoreUrl(inviteUrl, inviteCode) {
+    var referrer = inviteCode ? 'invite_code=' + inviteCode : 'invite_url=' + encodeURIComponent(inviteUrl);
+    return PLAY_STORE_URL + '&referrer=' + encodeURIComponent(referrer);
   }
 
   function copyWithHiddenTextarea(text) {
@@ -265,19 +294,33 @@
     document.getElementById('ios-copy-note').hidden = false;
   }
 
-  function handOffInviteToStore(store, url) {
+  function handOffInviteToStore(store, inviteUrl, inviteCode) {
     if (store === 'play') {
-      var playUrl = buildPlayStoreUrl(url);
+      var playUrl = buildPlayStoreUrl(inviteUrl, inviteCode);
       document.getElementById('badge-play').href = playUrl;
       location.replace(playUrl);
       return;
     }
-    copyInviteUrlOnAppleBadgeClick(url);
+    copyInviteUrlOnAppleBadgeClick(inviteUrl);
+  }
+
+  function continueWithInvite(inviteUrl, inviteCode) {
+    showInviteLink(inviteUrl);
+    if (mobileStore) handOffInviteToStore(mobileStore, inviteUrl, inviteCode);
   }
 
   var mobileStore = detectMobileStore();
   if (mobileStore) hideOtherStoreBadge(mobileStore);
-  if (mobileStore && inviteUrl) handOffInviteToStore(mobileStore, inviteUrl);
+
+  var inviteCode = readInviteCode();
+  var inviteUrl = readInviteUrl();
+  if (inviteUrl) {
+    continueWithInvite(inviteUrl, null);
+  } else if (inviteCode) {
+    resolveInviteCode(inviteCode).then(function (resolvedUrl) {
+      if (resolvedUrl) continueWithInvite(resolvedUrl, inviteCode);
+    });
+  }
 </script>
 </body>
 </html>
