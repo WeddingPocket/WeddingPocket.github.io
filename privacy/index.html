@@ -67,7 +67,7 @@
   img { max-width: 100%; }
   .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
 
-  .page-head { padding: 40px 0 8px; }
+  .page-head { padding: 40px 24px 8px; }
   .back-link {
     display: inline-flex;
     align-items: center;
@@ -294,10 +294,13 @@
   <div class="clause" id="s8">
     <h3>8. 개인정보의 국외 이전</h3>
     <table>
-      <thead><tr><th>받는 자</th><th>국가</th><th>항목</th><th>시기·방법</th><th>보유 기간</th></tr></thead>
+      <colgroup><col style="width:24%"><col><col></colgroup>
+      <thead><tr><th>받는 자</th><th>Supabase, Inc.</th><th>Google LLC</th></tr></thead>
       <tbody>
-        <tr><td>Supabase, Inc.</td><td>인도(뭄바이, AWS)</td><td>회원이 입력·저장한 모든 정보</td><td>서비스 이용 시 네트워크로 전송</td><td>탈퇴 시까지</td></tr>
-        <tr><td>Google LLC</td><td>미국</td><td>청첩장 사진</td><td>사진 인식 시 네트워크로 전송</td><td>Google 정책에 따름</td></tr>
+        <tr><th scope="row">국가</th><td>인도(뭄바이, AWS)</td><td>미국</td></tr>
+        <tr><th scope="row">항목</th><td>회원이 입력·저장한 모든 정보</td><td>청첩장 사진</td></tr>
+        <tr><th scope="row">시기·방법</th><td>서비스 이용 시 네트워크로 전송</td><td>사진 인식 시 네트워크로 전송</td></tr>
+        <tr><th scope="row">보유 기간</th><td>탈퇴 시까지</td><td>Google 정책에 따름</td></tr>
       </tbody>
     </table>
     <p>거부 방법과 결과: Supabase 이전을 거부하려면 서비스 이용을 중단(탈퇴)해야 합니다. Google 이전은 사진 자동 입력을 쓰지 않고 직접 입력하면 거부할 수 있습니다.</p>

@@ -1809,6 +1809,9 @@
   ];
 
   const STATS_CODE_LABELS = {
+    attending: '참석',
+    not_attending: '불참',
+    undecided: '미정',
     male: '남',
     female: '여',
     unspecified: '선택 안 함',
@@ -1881,7 +1884,8 @@
 
   function csvField(value) {
     const text = value === null || value === undefined ? '' : String(value);
-    return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    const safe = typeof value === 'string' && /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+    return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
   }
 
   function csvText(header, records) {
@@ -1937,9 +1941,12 @@
     const requestId = ++state.stats.requestId;
     const period = statsPeriod(form);
     const dimensions = checkedDimensions(form);
+    const submit = form.querySelector('button[type=submit]');
+    submit.disabled = true;
     const result = clear($('stats-result'));
     result.append(...skeletons(3, 'skeleton-row'));
     const { data, error } = await db.rpc('admin_gift_stats', { p_group_by: dimensions.map((dimension) => dimension.key), p_from: period.from, p_to: period.to });
+    submit.disabled = false;
     if (requestId !== state.stats.requestId) return;
     clear(result);
     if (error) return result.append(notice(describeError(error)));
