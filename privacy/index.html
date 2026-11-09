@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #fffaf5;
@@ -67,9 +67,7 @@
   img { max-width: 100%; }
   .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
 
-  .page-head {
-    padding: 40px 0 8px;
-  }
+  .page-head { padding: 40px 0 8px; }
   .back-link {
     display: inline-flex;
     align-items: center;
@@ -82,35 +80,18 @@
   .back-link:hover { color: var(--accent-strong); }
   .back-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 
-  .doc {
-    max-width: 640px;
-    margin: 32px auto 96px;
-    opacity: 0;
-    transform: translateY(14px);
-    animation: rise-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.08s forwards;
-  }
-  @keyframes rise-in {
-    from { opacity: 0; transform: translateY(14px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .doc { animation: none !important; opacity: 1 !important; transform: none !important; }
-  }
+  .doc { max-width: 640px; margin: 32px auto 96px; }
   .doc-title {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 4px 12px;
     border-bottom: 2px solid var(--ink);
     padding-bottom: 14px;
     margin-bottom: 8px;
   }
-  .doc-title h1 {
-    font-family: "Nanum Myeongjo", serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-  }
+  .doc-title h1 { font-size: 1.5rem; font-weight: 700; margin: 0; }
   .doc-title .date {
     font-size: 0.78rem;
     color: var(--ink-faint);
@@ -123,17 +104,44 @@
     color: var(--ink-soft);
     margin: 22px 0 8px;
   }
+
+  .summary {
+    margin: 22px 0 8px;
+    padding: 18px 18px 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .summary h2, .toc h2 { font-size: 0.94rem; font-weight: 700; margin: 0 0 12px; }
+  .summary ul { list-style: none; margin: 0; padding: 0; }
+  .summary li { margin: 0 0 10px; }
+  .summary a {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    color: inherit;
+    text-decoration: none;
+  }
+  .summary a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+  .summary svg { flex: none; width: 20px; height: 20px; margin-top: 2px; color: var(--accent-strong); }
+  .summary b { display: block; font-size: 0.82rem; font-weight: 600; color: var(--ink); }
+  .summary span { display: block; font-size: 0.8rem; line-height: 1.55; color: var(--ink-soft); }
+
+  .toc { margin: 22px 0 0; }
+  .toc ol { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 20px; }
+  .toc li { break-inside: avoid; margin: 0 0 6px; }
+  .toc a { font-size: 0.84rem; color: var(--ink-soft); text-decoration: none; }
+  .toc a:hover { color: var(--accent-strong); }
+  .toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+  @media (max-width: 480px) { .toc ol { columns: 1; } }
+
   .clause {
     padding: 22px 0;
     border-bottom: 1px solid var(--border-soft);
+    scroll-margin-top: 12px;
   }
   .clause:last-child { border-bottom: none; }
-  .clause h3 {
-    font-size: 0.94rem;
-    font-weight: 700;
-    margin: 0 0 9px;
-    color: var(--ink);
-  }
+  .clause h3 { font-size: 0.94rem; font-weight: 700; margin: 0 0 9px; color: var(--ink); }
   .clause p {
     font-size: 0.88rem;
     line-height: 1.75;
@@ -141,53 +149,26 @@
     margin: 0 0 6px;
   }
   .clause p:last-child { margin-bottom: 0; }
-  .officer {
-    display: flex;
-    gap: 28px;
-    flex-wrap: wrap;
-    font-size: 0.88rem;
-    color: var(--ink-soft);
+
+  table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    margin: 4px 0 8px;
+    font-size: 0.78rem;
+    line-height: 1.6;
   }
-  .officer div b {
-    display: block;
-    font-size: 0.72rem;
-    color: var(--ink-faint);
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    margin-bottom: 2px;
+  th, td {
+    border: 1px solid var(--border);
+    padding: 6px 7px;
+    text-align: left;
+    vertical-align: top;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
-  .steps {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 4px 0 0;
-    padding: 0;
-    list-style: none;
-    counter-reset: step;
-  }
-  .steps li {
-    counter-increment: step;
-    display: flex;
-    gap: 12px;
-    font-size: 0.88rem;
-    line-height: 1.7;
-    color: var(--ink-soft);
-  }
-  .steps li::before {
-    content: counter(step);
-    flex: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: var(--accent-strong);
-    font-size: 0.74rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-variant-numeric: tabular-nums;
-  }
+  th { background: var(--surface-2); color: var(--ink); font-weight: 600; }
+  td { color: var(--ink-soft); }
+
   footer {
     text-align: center;
     padding: 0 0 64px;
@@ -195,7 +176,6 @@
     color: var(--ink-faint);
   }
   footer a { color: var(--ink-faint); }
-
 </style>
 </head>
 <body>
@@ -206,89 +186,151 @@
 
 <div class="wrap">
 <div class="doc">
-      <div class="doc-title">
-        <h1>개인정보처리방침</h1>
-        <span class="date">시행일자 2026.11.02</span>
-      </div>
-      <p class="doc-lede">화:답(이하 "서비스")을 운영하는 Junyeop Lee(이하 "운영자")은 이용자의 개인정보를 중요하게
-        생각하며, 「개인정보 보호법」 등 관련 법령을 준수합니다. 본 개인정보처리방침을 통해 운영자가 어떤 정보를
-        수집하고, 어떻게 이용·보관하는지 안내드립니다.</p>
+  <div class="doc-title">
+    <h1>개인정보처리방침</h1>
+    <span class="date">시행일자 2026.11.02</span>
+  </div>
+  <p class="doc-lede">화:답(이하 "서비스")을 운영하는 Junyeop Lee(이하 "운영자")은 이용자의 개인정보를 중요하게 생각하며, 「개인정보 보호법」 등 관련 법령을 준수합니다. 본 개인정보처리방침을 통해 운영자가 어떤 정보를 수집하고, 어떻게 이용·보관하는지 안내드립니다.</p>
 
-      <div class="clause">
-        <h3>1. 수집하는 개인정보 항목</h3>
-        <p>필수: 이메일 주소, 프로필 정보(닉네임, 프로필 사진) — 구글, 카카오 또는 Apple 로그인을 통해 수집 (Apple 로그인은 이용자가 이메일 가리기를 선택하면 Apple이 만든 대체 이메일 주소가 수집됩니다)</p>
-        <p>서비스 이용 과정에서 회원이 직접 입력하는 정보: 청첩장 정보(신랑·신부 이름, 예식 일시·장소), 계좌번호,
-          축의금 기록, 예식장 후기</p>
-        <p>청첩장 자동 입력 기능 이용 시: 회원이 촬영하거나 선택한 청첩장 사진</p>
-        <p>예식장 후기 신고 시: 신고 사유·신고 내용, 신고한 회원의 계정 식별자</p>
-        <p>서비스 이용 과정에서 자동으로 생성·수집되는 정보: 서비스 이용 기록(앱 화면 이동, 기능 사용 여부, 청첩장 인식 결과와
-          청첩장 업체 도메인), 기기 정보(기기 모델, 운영체제와 버전, 앱 버전, 화면 크기, 언어·시간대), 무작위로 생성된
-          기기 식별자와 회원 식별자, 접속 IP 정보</p>
-      </div>
-      <div class="clause">
-        <h3>2. 개인정보 수집 방법</h3>
-        <p>구글 · 카카오 · Apple 로그인, 서비스 이용 중 회원이 직접 입력, 청첩장 자동 입력 기능 이용 시 회원이
-          촬영·선택한 사진, 서비스 이용 과정에서 이용 기록 분석 도구를 통한 자동 생성</p>
-      </div>
-      <div class="clause">
-        <h3>3. 개인정보의 수집 및 이용 목적</h3>
-        <p>회원 식별 및 로그인 · 청첩장·축의금 정보의 저장 및 기기 간 동기화 · 예식장 후기 통계(관계별 평균
-          축의금 등) 제공 · 서비스 부정이용 방지 · 신고된 후기의 확인 및 처리 · 서비스 이용 통계 분석 및 기능 개선</p>
-      </div>
-      <div class="clause">
-        <h3>4. 계좌번호의 암호화</h3>
-        <p>회원이 입력한 계좌번호는 평문으로 저장되지 않으며, 암호화되어 저장됩니다. 계좌번호를 화면에 표시할
-          때만 서버에서 복호화되며, 암호화 키는 클라이언트(앱/브라우저)에 저장되지 않습니다.</p>
-      </div>
-      <div class="clause">
-        <h3>5. 개인정보의 보유 및 이용 기간</h3>
-        <p>회원 탈퇴 시 청첩장 정보, 축의금 기록, 예식장 후기를 포함한 모든 개인정보는 지체 없이 파기됩니다.
-          다만 관계 법령에 따라 보존이 필요한 경우 해당 법령이 정한 기간 동안 보관합니다.</p>
-        <p>후기 신고 내역(신고 사유·내용, 신고자 계정 식별자)은 신고 처리 후에도 분쟁 대응과 반복 신고 방지를 위해
-          보관하며, 신고한 회원이 탈퇴하면 함께 파기됩니다.</p>
-        <p>서비스 이용 기록 분석 정보는 회원 탈퇴 시 회원 식별자와의 연결을 끊고, 분석 위탁 계약이 끝나면 파기됩니다.</p>
-      </div>
-      <div class="clause">
-        <h3>6. 개인정보의 제3자 제공</h3>
-        <p>운영자는 이용자의 동의 없이 개인정보를 외부에 제공하지 않습니다. 다만 청첩장 자동 입력 기능을
-          이용하는 경우에 한해, 아래 7항과 같이 사진 정보가 Google에 제공됩니다.</p>
-      </div>
-      <div class="clause">
-        <h3>7. 개인정보 처리 위탁</h3>
-        <p>서비스는 데이터 저장·인증을 위해 Supabase(해외 클라우드 인프라)를 이용하며, 이 과정에서 이용자의
-          정보가 국외 서버에 저장될 수 있습니다.</p>
-        <p>청첩장 자동 입력 기능에서 사진 속 정보를 인식하기 위해 회원이 촬영·선택한 청첩장 사진을 Google의
-          AI 모델(Gemini API)로 전송합니다. 해당 사진은 정보 추출 목적으로만 일시적으로 이용되며, Google
-          또는 운영자의 서버에 별도로 저장되지 않습니다.</p>
-        <p>서비스 이용 통계 분석을 위해 핵클 주식회사에 서비스 이용 기록, 기기 정보, 기기·회원 식별자, 접속 IP 정보의 처리를
-          위탁합니다. 이 정보는 AWS 서울 리전(국내)에 보관되며, 이름, 이메일, 계좌번호, 축의금 금액, 청첩장 내용은
-          전송하지 않습니다. 보유 기간은 위탁 계약 종료 시까지입니다.</p>
-      </div>
-      <div class="clause">
-        <h3>8. 예식장 후기의 공개 범위</h3>
-        <p>회원이 작성한 예식장 후기는 마스킹된 이름(예: "김**")으로 다른 회원에게 공개됩니다. 이메일, 계좌번호
-          등 민감한 정보는 후기에 노출되지 않습니다.</p>
-      </div>
-      <div class="clause">
-        <h3>9. 이용자의 권리와 행사 방법</h3>
-        <p>회원은 언제든지 서비스 내 [MY &gt; 회원탈퇴]를 통해 자신의 개인정보를 삭제하고 서비스 이용을 종료할
-          수 있으며, 개인정보 열람·정정을 원할 경우 아래 담당자에게 문의할 수 있습니다.</p>
-      </div>
-      <div class="clause">
-        <h3>10. 개인정보 보호책임자</h3>
-        <div class="officer">
-          <div><b>성명</b>Junyeop Lee</div>
-          <div><b>이메일</b>weddingpocket.jy@gmail.com</div>
-        </div>
-      </div>
-      <div class="clause">
-        <h3>11. 고지의 의무</h3>
-        <p>이 개인정보처리방침은 법령·정책 변경에 따라 수정될 수 있으며, 변경 시 서비스 내 공지를 통해
-          안내합니다.</p>
-      </div>
-    </div>
+  <section class="summary" aria-labelledby="summary-title">
+    <h2 id="summary-title">주요 처리 내용 요약</h2>
+    <ul>
+      <li><a href="#s1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 12h6M9 16h4"/></svg>
+        <div><b>수집 항목</b><span>이메일, 닉네임, 입력한 청첩장·축의금 정보, 선택 정보 등</span></div>
+      </a></li>
+      <li><a href="#s3">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        <div><b>처리 목적</b><span>로그인, 정보 저장·동기화, 후기 통계 제공, 부정이용 방지</span></div>
+      </a></li>
+      <li><a href="#s5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg>
+        <div><b>보유 기간</b><span>회원 탈퇴 시 지체 없이 파기</span></div>
+      </a></li>
+      <li><a href="#s7">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h13M12 3l4 4-4 4"/><path d="M21 17H8M12 13l-4 4 4 4"/></svg>
+        <div><b>처리 위탁</b><span>Supabase, Google, 네이버클라우드, 핵클</span></div>
+      </a></li>
+      <li><a href="#s8">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg>
+        <div><b>국외 이전</b><span>Supabase(인도), Google(미국)</span></div>
+      </a></li>
+      <li><a href="#s6">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 10.8l7.4-3.6M8.3 13.2l7.4 3.6"/></svg>
+        <div><b>제3자 제공</b><span>동의 없이 제공하지 않음</span></div>
+      </a></li>
+    </ul>
+  </section>
 
-    
+  <nav class="toc" aria-labelledby="toc-title">
+    <h2 id="toc-title">목차</h2>
+    <ol>
+      <li><a href="#s1">1. 수집하는 개인정보 항목</a></li>
+      <li><a href="#s2">2. 개인정보 수집 방법</a></li>
+      <li><a href="#s3">3. 개인정보의 수집 및 이용 목적</a></li>
+      <li><a href="#s4">4. 계좌번호의 암호화</a></li>
+      <li><a href="#s5">5. 개인정보의 보유 및 이용 기간</a></li>
+      <li><a href="#s6">6. 개인정보의 제3자 제공</a></li>
+      <li><a href="#s7">7. 개인정보 처리 위탁</a></li>
+      <li><a href="#s8">8. 개인정보의 국외 이전</a></li>
+      <li><a href="#s9">9. 예식장 후기의 공개 범위</a></li>
+      <li><a href="#s10">10. 이용자의 권리와 행사 방법</a></li>
+      <li><a href="#s11">11. 개인정보 보호책임자</a></li>
+      <li><a href="#s12">12. 고지의 의무</a></li>
+      <li><a href="#history">개정 이력</a></li>
+    </ol>
+  </nav>
+
+  <div class="clause" id="s1">
+    <h3>1. 수집하는 개인정보 항목</h3>
+    <p>필수: 이메일 주소, 프로필 정보(닉네임, 프로필 사진) — 구글, 카카오 또는 Apple 로그인을 통해 수집 (Apple 로그인은 이용자가 이메일 가리기를 선택하면 Apple이 만든 대체 이메일 주소가 수집됩니다)</p>
+    <p>서비스 이용 과정에서 회원이 직접 입력하는 정보: 청첩장 정보(신랑·신부 이름, 예식 일시·장소), 계좌번호, 축의금 기록, 예식장 후기</p>
+    <p>선택: 태어난 해, 성별, 혼인 여부(미혼·결혼 예정·기혼) — 회원가입 시 또는 [MY &gt; 내 정보]에서 직접 입력하며, 입력하지 않아도 서비스를 이용할 수 있습니다.</p>
+    <p>청첩장 자동 입력 기능 이용 시: 회원이 촬영하거나 선택한 청첩장 사진</p>
+    <p>청첩장 링크 자동 입력 기능 이용 시: 회원이 입력한 청첩장 링크 주소와 그 페이지의 내용(신랑·신부 이름, 예식 일시·장소, 계좌번호 등). 업체가 서버 접속을 막은 경우 회원의 기기에서 받은 페이지 내용</p>
+    <p>예식장 후기 신고 시: 신고 사유·신고 내용, 신고한 회원의 계정 식별자</p>
+    <p>서비스 이용 과정에서 자동으로 생성·수집되는 정보: 서비스 이용 기록(앱 화면 이동, 기능 사용 여부, 청첩장 인식 결과와 청첩장 업체 도메인), 기기 정보(기기 모델, 운영체제와 버전, 앱 버전, 화면 크기, 언어·시간대), 무작위로 생성된 기기 식별자와 회원 식별자, 접속 IP 정보</p>
+  </div>
+  <div class="clause" id="s2">
+    <h3>2. 개인정보 수집 방법</h3>
+    <p>구글 · 카카오 · Apple 로그인, 서비스 이용 중 또는 [MY &gt; 내 정보]에서 회원이 직접 입력, 청첩장 자동 입력 기능 이용 시 회원이 촬영·선택한 사진, 서비스 이용 과정에서 이용 기록 분석 도구를 통한 자동 생성</p>
+  </div>
+  <div class="clause" id="s3">
+    <h3>3. 개인정보의 수집 및 이용 목적</h3>
+    <p>회원 식별 및 로그인 · 청첩장·축의금 정보의 저장 및 기기 간 동기화 · 예식장 후기 통계(관계별 평균 축의금 등) 제공 · 서비스 부정이용 방지 · 신고된 후기의 확인 및 처리 · 서비스 이용 통계 분석 및 기능 개선</p>
+    <p>선택 정보: 연령대·성별·혼인 여부별 축의금 통계의 작성과 제공, 회원 맞춤 정보 제공. 결혼 예정 회원에게 웨딩 관련 제휴 혜택 안내(광고성 정보 수신에 동의한 경우에만)</p>
+    <p>지역별 많이 열린 식장 등, 회원이 저장한 청첩장을 이름 없이 집계한 통계 제공</p>
+    <p>외부에 제공하는 통계는 개인을 알아볼 수 없도록 집계한 형태로만 제공합니다.</p>
+  </div>
+  <div class="clause" id="s4">
+    <h3>4. 계좌번호의 암호화</h3>
+    <p>회원이 입력한 계좌번호는 평문으로 저장되지 않으며, 암호화되어 저장됩니다. 계좌번호를 화면에 표시할 때만 서버에서 복호화되며, 암호화 키는 클라이언트(앱/브라우저)에 저장되지 않습니다.</p>
+  </div>
+  <div class="clause" id="s5">
+    <h3>5. 개인정보의 보유 및 이용 기간</h3>
+    <p>회원 탈퇴 시 청첩장 정보, 축의금 기록, 예식장 후기를 포함한 모든 개인정보는 지체 없이 파기됩니다. 다만 관계 법령에 따라 보존이 필요한 경우 해당 법령이 정한 기간 동안 보관합니다.</p>
+    <p>후기 신고 내역(신고 사유·내용, 신고자 계정 식별자)은 신고 처리 후에도 분쟁 대응과 반복 신고 방지를 위해 보관하며, 신고한 회원이 탈퇴하면 함께 파기됩니다.</p>
+    <p>선택 정보: 회원이 [MY &gt; 내 정보]에서 지우거나 동의를 철회하거나 탈퇴하면 지체 없이 파기합니다.</p>
+    <p>청첩장 링크 인식 결과: 같은 링크를 다시 인식할 때 쓰기 위해 임시로 보관하며(계좌번호는 암호화), 예식일로부터 30일이 지나면 파기합니다.</p>
+    <p>서비스 이용 기록 분석 정보는 회원 탈퇴 시 회원 식별자와의 연결을 끊고, 분석 위탁 계약이 끝나면 파기됩니다.</p>
+  </div>
+  <div class="clause" id="s6">
+    <h3>6. 개인정보의 제3자 제공</h3>
+    <p>운영자는 이용자의 동의 없이 개인정보를 제3자에게 제공하지 않습니다. 개인을 알아볼 수 있는 정보를 제휴사에 제공해야 할 경우에는 받는 자·항목·목적·기간을 알리고 별도로 동의를 받습니다.</p>
+  </div>
+  <div class="clause" id="s7">
+    <h3>7. 개인정보 처리 위탁</h3>
+    <table>
+      <colgroup><col style="width:30%"><col></colgroup>
+      <thead><tr><th>수탁자</th><th>위탁 내용</th></tr></thead>
+      <tbody>
+        <tr><td>Supabase</td><td>서비스는 데이터 저장·인증을 위해 Supabase(해외 클라우드 인프라)를 이용하며, 이 과정에서 이용자의 정보가 국외 서버에 저장될 수 있습니다.</td></tr>
+        <tr><td>Google (Gemini API)</td><td>청첩장 자동 입력 기능에서 사진 속 정보를 인식하기 위해 회원이 촬영·선택한 청첩장 사진을 Google의 AI 모델(Gemini API)로 전송합니다. 운영자 서버에는 저장하지 않습니다. 다만 무료 이용 조건에 따라 Google이 서비스 개선을 위해 입력 내용을 보관·검토할 수 있습니다.</td></tr>
+        <tr><td>네이버클라우드 주식회사 (CLOVA Studio)</td><td>청첩장 링크의 정보를 자동으로 인식하기 어려울 때, 청첩장 페이지의 내용을 네이버클라우드 주식회사의 AI 모델(CLOVA Studio)로 보내 정보를 인식합니다. 국내에서 처리되며, 전화번호·이메일 같은 정보는 네이버클라우드가 자동으로 가립니다.</td></tr>
+        <tr><td>핵클 주식회사</td><td>서비스 이용 통계 분석을 위해 서비스 이용 기록, 기기 정보, 기기·회원 식별자, 접속 IP 정보의 처리를 위탁합니다. 이 정보는 AWS 서울 리전(국내)에 보관되며, 이름, 이메일, 계좌번호, 축의금 금액, 청첩장 내용은 전송하지 않습니다. 보유 기간은 위탁 계약 종료 시까지입니다.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="clause" id="s8">
+    <h3>8. 개인정보의 국외 이전</h3>
+    <table>
+      <thead><tr><th>받는 자</th><th>국가</th><th>항목</th><th>시기·방법</th><th>보유 기간</th></tr></thead>
+      <tbody>
+        <tr><td>Supabase, Inc.</td><td>인도(뭄바이, AWS)</td><td>회원이 입력·저장한 모든 정보</td><td>서비스 이용 시 네트워크로 전송</td><td>탈퇴 시까지</td></tr>
+        <tr><td>Google LLC</td><td>미국</td><td>청첩장 사진</td><td>사진 인식 시 네트워크로 전송</td><td>Google 정책에 따름</td></tr>
+      </tbody>
+    </table>
+    <p>거부 방법과 결과: Supabase 이전을 거부하려면 서비스 이용을 중단(탈퇴)해야 합니다. Google 이전은 사진 자동 입력을 쓰지 않고 직접 입력하면 거부할 수 있습니다.</p>
+  </div>
+  <div class="clause" id="s9">
+    <h3>9. 예식장 후기의 공개 범위</h3>
+    <p>회원이 작성한 예식장 후기는 마스킹된 이름(예: "김**")으로 다른 회원에게 공개됩니다. 이메일, 계좌번호 등 민감한 정보는 후기에 노출되지 않습니다.</p>
+  </div>
+  <div class="clause" id="s10">
+    <h3>10. 이용자의 권리와 행사 방법</h3>
+    <p>회원은 언제든지 서비스 내 [MY &gt; 회원탈퇴]를 통해 자신의 개인정보를 삭제하고 서비스 이용을 종료할 수 있으며, 개인정보 열람·정정을 원할 경우 아래 담당자에게 문의할 수 있습니다.</p>
+    <p>선택 정보와 선택 동의(추가 정보 수집·이용, 제휴 혜택 정보 제공, 혜택·광고 알림 수신)는 [MY &gt; 내 정보]에서 언제든 수정하거나 철회할 수 있습니다.</p>
+  </div>
+  <div class="clause" id="s11">
+    <h3>11. 개인정보 보호책임자</h3>
+    <p>성명: Junyeop Lee</p>
+    <p>이메일: weddingpocket.jy@gmail.com</p>
+  </div>
+  <div class="clause" id="s12">
+    <h3>12. 고지의 의무</h3>
+    <p>이 개인정보처리방침은 법령·정책 변경에 따라 수정될 수 있으며, 변경 시 서비스 내 공지를 통해 안내합니다.</p>
+  </div>
+  <div class="clause" id="history">
+    <h3>개정 이력</h3>
+    <table>
+      <thead><tr><th>시행일</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>시행일 미정</td><td>이번 개정</td></tr>
+        <tr><td>2026.11.02 시행</td><td>이전 버전</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 </div>
 
 <footer>

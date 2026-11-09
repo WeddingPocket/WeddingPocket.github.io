@@ -445,6 +445,7 @@
       <button class="tab" role="tab" data-tab="reviews" aria-selected="false" type="button">후기 관리</button>
       <button class="tab" role="tab" data-tab="users" aria-selected="false" type="button">사용자 조회</button>
       <button class="tab" role="tab" data-tab="inquiries" aria-selected="false" type="button">문의</button>
+      <button class="tab" role="tab" data-tab="stats" aria-selected="false" type="button">통계</button>
       <button class="tab" role="tab" data-tab="qr" aria-selected="false" type="button">QR 주소</button>
       <button class="tab" role="tab" data-tab="settings" aria-selected="false" type="button">앱 설정</button>
     </div>
@@ -478,6 +479,7 @@
     <div class="panel" id="panel-reviews" data-panel="reviews" hidden></div>
     <div class="panel" id="panel-users" data-panel="users" hidden></div>
     <div class="panel" id="panel-inquiries" data-panel="inquiries" hidden></div>
+    <div class="panel" id="panel-stats" data-panel="stats" hidden></div>
     <div class="panel" id="panel-qr" data-panel="qr" hidden></div>
     <div class="panel" id="panel-settings" data-panel="settings" hidden></div>
   </section>
@@ -563,6 +565,7 @@
     reviews: { search: '', includeHidden: true, reportedOnly: false, hiddenOnly: false, offset: 0, rows: [], hasNext: false, confirmId: null, confirmAction: null, errors: {}, requestId: 0, selected: new Set(), bulk: { action: null, confirming: false, done: 0, total: 0 } },
     parse: { rows: [], open: new Map(), sort: 'problem', othersOpen: false, confirmKey: null, deleting: false },
     appConfig: { row: null, form: null, confirmRaise: false, saving: false, savedAt: null, errors: [], requestId: 0 },
+    stats: { dimensions: [], rows: [], requestId: 0 },
     userRequestId: 0
   };
 
@@ -703,6 +706,7 @@
     state.reviews = { ...state.reviews, reportedOnly: false, hiddenOnly: false, offset: 0, rows: [], hasNext: false, confirmId: null, confirmAction: null, errors: {}, selected: new Set(), bulk: { action: null, confirming: false, done: 0, total: 0 } };
     state.parse = { rows: [], open: new Map(), sort: 'problem', othersOpen: false, confirmKey: null, deleting: false };
     state.appConfig = { row: null, form: null, confirmRaise: false, saving: false, savedAt: null, errors: [], requestId: state.appConfig.requestId + 1 };
+    state.stats = { dimensions: [], rows: [], requestId: state.stats.requestId + 1 };
     forgetGmail();
     document.querySelectorAll('[data-panel]').forEach(clear);
   }
@@ -1795,6 +1799,187 @@
     clear($('panel-users')).append(form, el('div', { id: 'user-result' }, emptyState('이메일로 사용자를 찾아요', '청첩장·장부 내용은 보이지 않고 건수만 확인할 수 있어요.')));
   }
 
+  const STATS_DIMENSIONS = [
+    { key: 'age_band', label: '나이대' },
+    { key: 'gender', label: '성별' },
+    { key: 'marital_status', label: '혼인 여부' },
+    { key: 'sido', label: '시·도' },
+    { key: 'relationship', label: '관계' },
+    { key: 'side', label: '신랑·신부측' }
+  ];
+
+  const STATS_CODE_LABELS = {
+    male: '남',
+    female: '여',
+    unspecified: '선택 안 함',
+    single: '미혼',
+    engaged: '결혼 예정',
+    married: '기혼',
+    family: '가족',
+    relative: '친척',
+    friend: '친구',
+    coworker: '동료',
+    acquaintance: '지인',
+    groom: '신랑측',
+    bride: '신부측'
+  };
+
+  const STATS_SUPPRESSED_LABEL = '표본 부족';
+
+  const FACT_COLUMNS = [
+    ['member_key', '회원 키'],
+    ['age_band', '나이대'],
+    ['gender', '성별'],
+    ['marital_status', '혼인 여부'],
+    ['event_month', '예식 월'],
+    ['event_weekday', '예식 요일'],
+    ['time_band', '시간대'],
+    ['sido', '시·도'],
+    ['sigungu', '시·군·구'],
+    ['venue_key', '식장 키'],
+    ['venue_name', '식장 이름'],
+    ['relationship', '관계'],
+    ['amount', '금액'],
+    ['attendance', '참석 여부'],
+    ['side', '신랑·신부측']
+  ];
+
+  function statsCodeLabel(value) {
+    return STATS_CODE_LABELS[value] || value;
+  }
+
+  function seoulToday() {
+    return new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+  }
+
+  function seoulOneYearAgo() {
+    const [year, month, day] = seoulToday().split('-').map(Number);
+    return new Date(Date.UTC(year - 1, month - 1, day)).toISOString().slice(0, 10);
+  }
+
+  function statsCell(row, key, value) {
+    if (key === 'avg_amount' || key === 'median_amount') return row.suppressed ? STATS_SUPPRESSED_LABEL : formatNumber(value);
+    return formatNumber(value);
+  }
+
+  function statsTable(rows, dimensions) {
+    const head = el('tr', {},
+      dimensions.map((dimension) => el('th', { text: dimension.label })),
+      el('th', { class: 'num', text: '건수' }),
+      el('th', { class: 'num', text: '회원 수' }),
+      el('th', { class: 'num', text: '평균' }),
+      el('th', { class: 'num', text: '중앙값' }));
+    const body = rows.map((row) =>
+      el('tr', {},
+        dimensions.map((dimension) => el('td', { text: statsCodeLabel(row[dimension.key]) })),
+        el('td', { class: 'num', text: formatNumber(row.entry_count) }),
+        el('td', { class: 'num', text: formatNumber(row.member_count) }),
+        el('td', { class: row.suppressed ? 'num dim' : 'num', text: statsCell(row, 'avg_amount', row.avg_amount) }),
+        el('td', { class: row.suppressed ? 'num dim' : 'num', text: statsCell(row, 'median_amount', row.median_amount) })));
+    return el('div', { class: 'table-wrap' }, el('table', {}, el('thead', {}, head), el('tbody', {}, body)));
+  }
+
+  function csvField(value) {
+    const text = value === null || value === undefined ? '' : String(value);
+    return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  }
+
+  function csvText(header, records) {
+    return [header, ...records].map((record) => record.map(csvField).join(',')).join('\r\n');
+  }
+
+  function downloadCsv(fileName, text) {
+    const url = URL.createObjectURL(new Blob(['﻿', text], { type: 'text/csv;charset=utf-8' }));
+    const link = el('a', { href: url, download: fileName });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function csvFileName(prefix) {
+    return `${prefix}-${seoulToday().replace(/-/g, '')}.csv`;
+  }
+
+  function downloadStatsCsv() {
+    const { rows, dimensions } = state.stats;
+    const header = [...dimensions.map((dimension) => dimension.label), '건수', '회원 수', '평균', '중앙값'];
+    const records = rows.map((row) => [
+      ...dimensions.map((dimension) => statsCodeLabel(row[dimension.key])),
+      row.entry_count,
+      row.member_count,
+      row.suppressed ? '' : row.avg_amount,
+      row.suppressed ? '' : row.median_amount
+    ]);
+    downloadCsv(csvFileName('hwadap-stats'), csvText(header, records));
+  }
+
+  async function downloadFactsCsv(period, button) {
+    button.disabled = true;
+    const { data, error } = await db.rpc('admin_gift_facts', { p_from: period.from, p_to: period.to });
+    button.disabled = false;
+    if (error) return showToast(describeError(error));
+    const records = data.map((row) => FACT_COLUMNS.map(([key]) => statsCodeLabel(row[key])));
+    downloadCsv(csvFileName('hwadap-facts'), csvText(FACT_COLUMNS.map(([, label]) => label), records));
+  }
+
+  function statsPeriod(form) {
+    const data = new FormData(form);
+    return { from: data.get('from'), to: data.get('to') };
+  }
+
+  function checkedDimensions(form) {
+    const chosen = new Set(new FormData(form).getAll('dimension'));
+    return STATS_DIMENSIONS.filter((dimension) => chosen.has(dimension.key));
+  }
+
+  async function loadStats(form) {
+    const requestId = ++state.stats.requestId;
+    const period = statsPeriod(form);
+    const dimensions = checkedDimensions(form);
+    const result = clear($('stats-result'));
+    result.append(...skeletons(3, 'skeleton-row'));
+    const { data, error } = await db.rpc('admin_gift_stats', { p_group_by: dimensions.map((dimension) => dimension.key), p_from: period.from, p_to: period.to });
+    if (requestId !== state.stats.requestId) return;
+    clear(result);
+    if (error) return result.append(notice(describeError(error)));
+    state.stats = { ...state.stats, dimensions, rows: data };
+    if (!data.length) return result.append(emptyState('이 기간에 기록이 없어요'));
+    result.append(statsTable(data, dimensions));
+  }
+
+  function submitStats(event) {
+    event.preventDefault();
+    loadStats(event.target);
+  }
+
+  function statsControls() {
+    const form = el('form', { class: 'toolbar', id: 'stats-form', onsubmit: submitStats },
+      el('label', { class: 'check' }, '시작일', el('input', { class: 'field', name: 'from', type: 'date', required: true, style: 'min-width:150px', value: seoulOneYearAgo() })),
+      el('label', { class: 'check' }, '종료일', el('input', { class: 'field', name: 'to', type: 'date', required: true, style: 'min-width:150px', value: seoulToday() })),
+      STATS_DIMENSIONS.map((dimension) =>
+        el('label', { class: 'check' }, el('input', { name: 'dimension', type: 'checkbox', value: dimension.key }), dimension.label)),
+      el('button', { class: 'btn btn-primary', type: 'submit', text: '조회' }));
+    return form;
+  }
+
+  function statsExportBar(form) {
+    const factsButton = el('button', { class: 'btn', type: 'button', text: '내부용 CSV' });
+    factsButton.addEventListener('click', () => downloadFactsCsv(statsPeriod(form), factsButton));
+    return el('div', { class: 'toolbar' },
+      el('button', { class: 'btn', type: 'button', text: '업체용 CSV', onclick: downloadStatsCsv }),
+      factsButton);
+  }
+
+  function loadStatsPanel() {
+    const form = statsControls();
+    clear($('panel-stats')).append(
+      el('div', { class: 'toolbar' }, el('h2', { text: '축의금 통계' })),
+      form,
+      statsExportBar(form),
+      el('div', { id: 'stats-result' }, emptyState('기간과 묶음 기준을 고르고 조회해 주세요', '회원 수가 5명 미만인 묶음은 평균과 중앙값을 보여 주지 않아요.')));
+  }
+
   const SHORT_LINK_BASE_URL = 'https://www.hwadap.co.kr/add/?c=';
 
   async function copyShortLink(shortUrl) {
@@ -2583,6 +2768,7 @@
     parse: loadParseQuality,
     reviews: loadReviewsPanel,
     users: loadUsersPanel,
+    stats: loadStatsPanel,
     qr: loadShortLinkPanel,
     inquiries: loadInquiriesPanel,
     settings: loadAppSettingsPanel
