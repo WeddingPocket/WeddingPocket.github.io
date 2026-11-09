@@ -2508,7 +2508,8 @@
       noticeActive: Boolean(row.notice_active),
       noticeLevel: row.notice_level === 'warning' ? 'warning' : 'info',
       noticeTitle: row.notice_title || '',
-      noticeBody: row.notice_body || ''
+      noticeBody: row.notice_body || '',
+      popularVenueMinWeddings: String(row.popular_venue_min_weddings)
     };
   }
 
@@ -2526,6 +2527,10 @@
     return errors;
   }
 
+  function venueRankingErrors(form) {
+    return parseVersion(form.popularVenueMinWeddings) === null ? ['인기 식장 최소 결혼식 수는 0 이상의 정수로 입력해 주세요'] : [];
+  }
+
   function noticeErrors(form) {
     const errors = [];
     if (form.noticeActive && !form.noticeTitle.trim()) errors.push('공지를 켜려면 제목을 입력해 주세요');
@@ -2535,7 +2540,7 @@
   }
 
   function settingsErrors(form) {
-    return [...versionErrors(form), ...noticeErrors(form)];
+    return [...versionErrors(form), ...venueRankingErrors(form), ...noticeErrors(form)];
   }
 
   function isRaisingMinVersion(form) {
@@ -2546,6 +2551,7 @@
     if (isMissingFunction(error) || error.code !== '22023') return [describeError(error)];
     const message = error.message || '';
     if (/latest_version_code/.test(message)) return ['최신 버전은 최소 지원 버전보다 낮을 수 없어요'];
+    if (/popular_venue_min_weddings/.test(message)) return ['인기 식장 최소 결혼식 수는 0 이상의 정수로 입력해 주세요'];
     if (/level/.test(message)) return ['공지 종류가 올바르지 않아요'];
     if (/title|body/.test(message)) return [`제목은 ${NOTICE_TITLE_LIMIT}자, 내용은 ${NOTICE_BODY_LIMIT}자까지 쓸 수 있어요`];
     return ['입력한 값을 확인해 주세요'];
@@ -2558,7 +2564,8 @@
       p_notice_active: form.noticeActive,
       p_notice_title: form.noticeTitle.trim(),
       p_notice_body: form.noticeBody.trim(),
-      p_notice_level: form.noticeLevel
+      p_notice_level: form.noticeLevel,
+      p_popular_venue_min_weddings: Number(form.popularVenueMinWeddings)
     };
   }
 
@@ -2614,6 +2621,13 @@
       el('div', { class: 'form-grid' },
         versionRow('최소 지원 버전 (versionCode)', 'min-version', 'minVersion', "최소 지원 버전보다 낮은 앱에는 앱을 켤 때마다 '업데이트가 필요해요' 팝업이 떠요 (닫을 수 있어요)"),
         versionRow('최신 버전 (versionCode)', 'latest-version', 'latestVersion', "최신 버전보다 낮은 앱에는 '새 버전이 나왔어요' 알림이 버전마다 한 번 떠요")));
+  }
+
+  function venueRankingSection() {
+    return el('section', { class: 'settings-card' },
+      el('h3', { text: '식장 순위' }),
+      el('div', { class: 'form-grid' },
+        versionRow('인기 식장 최소 결혼식 수', 'popular-venue-min-weddings', 'popularVenueMinWeddings', '지역의 결혼식이 이 수보다 적으면 앱에서 식장 순위를 숨겨요')));
   }
 
   function noticeActiveToggle() {
@@ -2708,7 +2722,7 @@
 
   function renderAppSettings() {
     clear($('panel-settings')).append(
-      el('div', { class: 'settings' }, versionSection(), noticeSection(), errorList(), saveBar()));
+      el('div', { class: 'settings' }, versionSection(), venueRankingSection(), noticeSection(), errorList(), saveBar()));
   }
 
   function changeNoticeActive(active) {
